@@ -1,0 +1,179 @@
+ <div id="notification-popups"></div>
+<style>
+.popup {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fefefe;
+    border-radius: 12px;
+    border: 2px solid #4CAF50;
+    padding: 20px;
+    z-index: 10000;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+    width: 350px;
+    text-align: center;
+    animation: slideDown 0.4s ease;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+@keyframes slideDown {
+    from {
+        top: 50px;
+        opacity: 0;
+    }
+    to {
+        top: 100px;
+        opacity: 1;
+    }
+}
+
+.popup h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 22px;
+}
+
+.popup p {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #333;
+}
+
+.popup-buttons {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.popup-buttons button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.popup-buttons .view-request {
+    background-color: #2196F3;
+}
+
+.popup-buttons .view-request:hover {
+    background-color: #1976D2;
+}
+
+.popup-buttons .accept-request {
+    background-color: #4CAF50;
+}
+
+.popup-buttons .accept-request:hover {
+    background-color: #388E3C;
+}
+
+.popup-buttons .reject-request {
+    background-color: #F44336;
+}
+
+.popup-buttons .reject-request:hover {
+    background-color: #D32F2F;
+}
+
+.popup-buttons .close-popup {
+    background-color: #607D8B;
+}
+
+.popup-buttons .close-popup:hover {
+    background-color: #455A64;
+}
+
+</style>
+
+<audio id="notif-sound" src="catalog/view/theme/default/audio/notify.mp3" preload="auto"></audio>
+
+
+<script>
+function playNotificationSound() {
+    const audio = document.getElementById('notif-sound');
+    if (audio) {
+        audio.play().catch(e => console.log("Audio play blocked:", e));
+    }
+}
+
+$(document).ready(function () {
+
+    var notifications = {{ unseen_requests|default([])|json_encode|raw }};
+    var currentIndex = 0;
+    function showNextPopup() {
+        if (currentIndex < notifications.length) {
+            var notification = notifications[currentIndex];
+            var popup = $(`
+                <div class="popup" id="popup-${notification.id}">
+                    <h3>New Hire Request!</h3>
+                    <p><strong>${notification.customer_name}</strong> wants to hire you.</p>
+                    <p>📞 <strong>${notification.customer_mobile}</strong></p>
+                    <p>📍 ${notification.customer_address}</p>
+                    <div class="popup-buttons">
+                        <button class="view-request" data-id="${notification.id}">View</button>
+                        <button class="accept-request" data-id="${notification.id}">Accept</button>
+                        <button class="reject-request" data-id="${notification.id}">Reject</button>
+                        <button class="close-popup" data-id="${notification.id}">Got it!</button>
+                    </div>
+                </div>
+            `);
+
+            $('#notification-popups').append(popup);
+            playNotificationSound();
+        }
+    }
+
+    // Start with the first popup
+    showNextPopup();
+
+    // Close
+    $(document).on('click', '.close-popup', function () {
+        var id = $(this).data('id');
+        closePopup(id, 'markSeen');
+    });
+
+    // Accept
+    $(document).on('click', '.accept-request', function () {
+        var id = $(this).data('id');
+        closePopup(id, 'accept');
+    });
+
+    // Reject
+    $(document).on('click', '.reject-request', function () {
+        var id = $(this).data('id');
+        closePopup(id, 'reject');
+    });
+
+    // View
+    $(document).on('click', '.view-request', function () {
+        var id = $(this).data('id');
+        window.location.href = 'index.php?route=extension/module/notification_popup/view&id=' + id;
+    });
+
+    function closePopup(id, action) {
+        $('#popup-' + id).fadeOut(300, function () {
+            $(this).remove();
+            $.ajax({
+                url: 'index.php?route=extension/module/notification_popup/' + action,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id }),
+                success: function (response) {
+                    console.log(action + ' success:', response);
+                }
+            });
+            currentIndex++;
+            showNextPopup();
+        });
+    }
+});
+</script> 
+
+

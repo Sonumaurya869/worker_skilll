@@ -1,0 +1,822 @@
+
+<style>
+.worker-layout {
+  margin-bottom: 30px;
+}
+
+.worker-thumb {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.worker-thumb:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.worker-thumb .image {
+  position: relative;
+  overflow: hidden;
+  height: 282px;
+}
+
+.worker-thumb .image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.worker-thumb .image:hover img {
+  transform: scale(1.05);
+}
+
+.worker-thumb .caption {
+  padding: 15px;
+  flex-grow: 1;
+}
+
+.worker-thumb .caption h4 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.worker-thumb .caption h4 a {
+  color: #333;
+  text-decoration: none;
+}
+
+.worker-thumb .caption h4 a:hover {
+  color: #007bff;
+}
+
+.worker-thumb .caption p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.worker-skill, .worker-experience, .worker-mobile, .worker-age {
+  border-left: 3px solid #007bff;
+  padding-left: 8px;
+  margin: 8px 0;
+}
+
+.worker-location {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.worker-status {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #28a745;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.rating {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.rating .fa-star {
+  color: #ffc107;
+}
+
+.rating .fa-star-o {
+  color: #ddd;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  margin: 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-top: 1px solid #eee;
+}
+
+.button-group .btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-size: 12px;
+}
+
+.btn-hire {
+  background: linear-gradient(45deg, #28a745, #20c997);
+  color: white;
+}
+
+.btn-hire:hover {
+  background: linear-gradient(45deg, #218838, #1ea080);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-contact {
+  background: linear-gradient(45deg, #17a2b8, #20c997);
+  color: white;
+}
+
+.btn-contact:hover {
+  background: linear-gradient(45deg, #138496, #1ea080);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+}
+
+.btn-view {
+  background: linear-gradient(45deg, #007bff, #6610f2);
+  color: white;
+}
+
+.btn-view:hover {
+  background: linear-gradient(45deg, #0056b3, #520dc2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.button-group .btn i {
+  margin-right: 5px;
+}
+
+.badge-success {
+  background-color: #28a745;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .button-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .button-group .btn {
+    width: 100%;
+  }
+  
+  .worker-thumb .image {
+    height: 150px;
+  }
+}
+</style>
+<style>
+/* Previous CSS remains the same... */
+
+.review-section {
+  background: #fff;
+  border-top: 1px solid #eee;
+  padding: 10px 15px;
+}
+
+.like-dislike-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.like-dislike-group .btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #666;
+  font-size: 12px;
+}
+
+.btn-like {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+.btn-like:hover, .btn-like.active {
+  background: #28a745;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.btn-dislike {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-dislike:hover, .btn-dislike.active {
+  background: #dc3545;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.btn-review {
+  border-color: #ffc107;
+  color: #ffc107;
+}
+
+.btn-review:hover {
+  background: #ffc107;
+  color: #212529;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+}
+
+.like-count, .dislike-count {
+  margin-left: 5px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .like-dislike-group {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .like-dislike-group .btn {
+    width: 100%;
+  }
+}
+</style>
+
+
+<h3>{{ heading_title }}</h3>
+<div class="row">
+  {% for worker in workers %}
+  <div class="worker-layout col-lg-3 col-md-4 col-sm-6 col-xs-12">
+    <div class="worker-thumb">
+      <div class="image">
+        <a href="{{ worker.href }}">
+          <img src="{{ worker.image ? worker.image : 'placeholder.png' }}" alt="{{ worker.name }}" title="{{ worker.name }}" class="img-responsive" />
+        </a>
+      </div>
+      
+      <div class="caption">
+        <h4><a href="{{ worker.href }}">{{ worker.name }}</a></h4>
+        
+        {% if worker.skill %}
+        <p class="worker-skill"><strong>Skill:</strong> {{ worker.skill }}</p>
+        {% endif %}
+        
+        {% if worker.experience %}
+        <p class="worker-experience"><strong>Experience:</strong> {{ worker.experience }} years</p>
+        {% endif %}
+        
+        {% if worker.telephone %}
+        <p class="worker-mobile"><strong>Mobile:</strong> {{ worker.telephone }}</p>
+        {% endif %}
+        
+        {% if worker.date_of_birth %}
+        <p class="worker-age"><strong>Age:</strong> {{ worker.age }} years</p>
+        {% endif %}
+        
+        {% if worker.rating %}
+        <div class="rating">
+          {% for i in 1..5 %}
+          {% if worker.rating < i %}
+          <span class="fa fa-star-o"></span>
+          {% else %}
+          <span class="fa fa-star"></span>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if worker.price_per_day %}
+        <p class="price">
+          <span class="price-per-day">{{ worker.price_per_day }}/day</span>
+        </p>
+        {% endif %}
+        
+        {% if worker.location %}
+        <p class="worker-location"><i class="fa fa-map-marker"></i> {{ worker.location }}</p>
+        {% endif %}
+        
+        {% if worker.wk_status %}
+        <p class="worker-status">
+          <span class="badge {{ worker.wk_status == 'available' ? 'badge-success' : 'badge-warning' }}">
+            {{ worker.wk_status|title }}
+          </span>
+        </p>
+        {% endif %}
+      </div>
+      
+     <div class="button-group">
+  <button type="button" onclick="openHireModal('{{ worker.customer_id }}', '{{ worker.name }}');" class="btn btn-hire" data-toggle="tooltip" title="Hire {{ worker.name }}">
+  <i class="fa fa-user-plus"></i> <span class="hidden-xs hidden-sm">Hire</span>
+</button>
+
+  <button type="button" data-toggle="tooltip" title="Contact {{ worker.name }}" onclick="contactWorker('{{ worker.customer_id }}', '{{ worker.telephone }}', '{{ worker.name }}');" class="btn btn-contact">
+    <i class="fa fa-phone"></i>
+  </button>
+  <button type="button" data-toggle="tooltip" title="View Profile" onclick="viewProfile('{{ worker.customer_id }}');" class="btn btn-view">
+    <i class="fa fa-eye"></i>
+  </button>
+</div>
+
+<!-- New Review Section -->
+<div class="review-section" data-worker-id="{{ worker.customer_id }}">
+  <div class="like-dislike-group">
+    <button type="button" onclick="likeWorker('{{ worker.customer_id }}');" class="btn btn-like {{ worker.user_liked ? 'active' : '' }}" data-toggle="tooltip" title="Like">
+      <i class="fa fa-thumbs-up"></i> <span class="like-count">{{ worker.likes_count|default(0) }}</span>
+    </button>
+    <button type="button" onclick="dislikeWorker('{{ worker.customer_id }}');" class="btn btn-dislike {{ worker.user_disliked ? 'active' : '' }}" data-toggle="tooltip" title="Dislike">
+      <i class="fa fa-thumbs-down"></i> <span class="dislike-count">{{ worker.dislikes_count|default(0) }}</span>
+    </button>
+    <button type="button" onclick="writeReview('{{ worker.customer_id }}', '{{ worker.name }}');" class="btn btn-review" data-toggle="tooltip" title="Write Review">
+      <i class="fa fa-star"></i> <span class="hidden-xs hidden-sm">Review</span>
+    </button>
+  </div>
+</div>
+
+  </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Hire Worker Modal -->
+<div class="modal fade" id="hireWorkerModal" tabindex="-1" role="dialog" aria-labelledby="hireWorkerModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="hireWorkerForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="hireWorkerModalLabel">Hire Worker</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <input type="hidden" id="modalWorkerId" name="worker_id">
+          <div class="form-group">
+            <label for="customerName">Your Name</label>
+            <input type="text" class="form-control" id="customerName" name="customer_name" required>
+          </div>
+          <div class="form-group">
+            <label for="customerMobile">Mobile Number</label>
+            <input type="tel" class="form-control" id="customerMobile" name="customer_mobile" required>
+          </div>
+          <div class="form-group">
+            <label for="customerAddress">Address</label>
+            <textarea class="form-control" id="customerAddress" name="customer_address" required></textarea>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Submit Hire Request</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+        
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// Hire Worker Function
+function openHireModal(workerId, workerName) {
+  // Set the worker ID in the hidden input
+  document.getElementById('modalWorkerId').value = workerId;
+  
+  // Optionally, you can display the worker's name in the modal title
+  document.getElementById('hireWorkerModalLabel').textContent = 'Hire ' + workerName;
+  
+  // Reset the form fields
+  document.getElementById('hireWorkerForm').reset();
+  
+  // Show the modal
+  $('#hireWorkerModal').modal('show');
+}
+
+// Handle form submission
+document.getElementById('hireWorkerForm').addEventListener('submit', function(event) {
+  event.preventDefault(); // Prevent default form submission
+  // Gather form data
+  const formData = {
+    worker_id: document.getElementById('modalWorkerId').value,
+    customer_name: document.getElementById('customerName').value,
+    customer_mobile: document.getElementById('customerMobile').value,
+    customer_address: document.getElementById('customerAddress').value,
+    action: 'hire'
+  };
+  
+  // Show loading indicator
+  showLoading();
+  
+  // Send AJAX request
+  $.ajax({
+    url: 'index.php?route=extension/module/wk_skill_cust/hire',
+    type: 'POST',
+    data: formData,
+    dataType: 'json',
+    success: function(response) {
+      hideLoading();
+      $('#hireWorkerModal').modal('hide'); // Hide the modal
+      if (response.success) {
+        showAlert('success', 'Success!', 'Hiring request sent successfully.');
+      } else {
+        showAlert('error', 'Error!', response.error || 'Failed to send hiring request.');
+      }
+    },
+    error: function() {
+      hideLoading();
+      $('#hireWorkerModal').modal('hide'); // Hide the modal
+      showAlert('error', 'Error!', 'Something went wrong. Please try again.');
+    }
+  });
+});
+
+
+// Contact Worker Function
+function contactWorker(workerId, phone, workerName) {
+    var modalHtml = `
+        <div class="modal fade" id="contactModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Contact ${workerName}</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="contact-options">
+                            <a href="tel:${phone}" class="btn btn-success btn-block" style="margin-bottom: 10px;">
+                                <i class="fa fa-phone"></i> Call Now: ${phone}
+                            </a>
+                            <a href="sms:${phone}" class="btn btn-info btn-block" style="margin-bottom: 10px;">
+                                <i class="fa fa-comment"></i> Send SMS
+                            </a>
+                            <button onclick="sendMessage(${workerId})" class="btn btn-primary btn-block">
+                                <i class="fa fa-envelope"></i> Send Message
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('#contactModal').remove();
+    $('body').append(modalHtml);
+    $('#contactModal').modal('show');
+}
+
+// View Profile Function
+function viewProfile(workerId) {
+    showLoading();
+    window.location.href = 'index.php?route=wk_skill_cust/profile&worker_id=' + workerId;
+}
+
+// Send Message Function
+function sendMessage(workerId) {
+    $('#contactModal').modal('hide');
+    
+    var message = prompt('Enter your message:');
+    if (message && message.trim() !== '') {
+        $.ajax({
+            url: 'index.php?route=worker/message',
+            type: 'POST',
+            data: {
+                worker_id: workerId,
+                message: message
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', 'Success!', 'Message sent successfully');
+                } else {
+                    showAlert('error', 'Error!', response.error || 'Failed to send message');
+                }
+            }
+        });
+    }
+}
+
+// Utility Functions
+function showLoading() {
+    if ($('#loadingModal').length === 0) {
+        $('body').append(`
+            <div class="modal fade" id="loadingModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-sm" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body text-center">
+                            <i class="fa fa-spinner fa-spin fa-2x"></i>
+                            <p>Please wait...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+    $('#loadingModal').modal('show');
+}
+
+function hideLoading() {
+    $('#loadingModal').modal('hide');
+}
+
+function showAlert(type, title, message, $container) {
+    var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    var alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>${title}</strong> ${message}
+        </div>
+    `;
+
+    // Remove existing alert first
+    $container.find('.alert').remove();
+    $container.prepend(alertHtml);
+
+    setTimeout(function () {
+        $container.find('.alert').fadeOut();
+    }, 5000);
+}
+
+
+
+// Initialize tooltips
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+<script>
+// Previous JavaScript functions remain the same...
+
+// Like Worker Function
+function likeWorker(workerId) {
+    $.ajax({
+        url: 'index.php?route=extension/module/wk_skill_cust/like',
+        type: 'POST',
+        data: {
+            worker_id: workerId,
+            action: 'like'
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                // Update like button
+                var likeBtn = $('button[onclick*="likeWorker(\'' + workerId + '\')"]');
+                var dislikeBtn = $('button[onclick*="dislikeWorker(\'' + workerId + '\')"]');
+                
+                if (response.liked) {
+                    likeBtn.addClass('active');
+                    dislikeBtn.removeClass('active');
+                } else {
+                    likeBtn.removeClass('active');
+                }
+                
+                // Update counts
+                likeBtn.find('.like-count').text(response.likes_count);
+                dislikeBtn.find('.dislike-count').text(response.dislikes_count);
+            } else {
+                showAlert('error', 'Error!', response.error || 'Failed to like worker');
+            }
+        },
+        error: function() {
+            showAlert('error', 'Error!', 'Something went wrong. Please try again.');
+        }
+    });
+}
+
+// Dislike Worker Function
+function dislikeWorker(workerId) {
+    $.ajax({
+        url: 'index.php?route=extension/module/wk_skill_cust/like',
+        type: 'POST',
+        data: {
+            worker_id: workerId,
+            action: 'dislike'
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                // Update dislike button
+                var likeBtn = $('button[onclick*="likeWorker(\'' + workerId + '\')"]');
+                var dislikeBtn = $('button[onclick*="dislikeWorker(\'' + workerId + '\')"]');
+                
+                if (response.disliked) {
+                    dislikeBtn.addClass('active');
+                    likeBtn.removeClass('active');
+                } else {
+                    dislikeBtn.removeClass('active');
+                }
+                
+                // Update counts
+                likeBtn.find('.like-count').text(response.likes_count);
+                dislikeBtn.find('.dislike-count').text(response.dislikes_count);
+            } else {
+                showAlert('error', 'Error!', response.error || 'Failed to dislike worker');
+            }
+        },
+        error: function() {
+            showAlert('error', 'Error!', 'Something went wrong. Please try again.');
+        }
+    });
+}
+
+// Write Review Function
+function writeReview(workerId, workerName) {
+    var modalHtml = `
+        <div class="modal fade" id="reviewModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Write Review for ${workerName}</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="reviewForm">
+                            <div class="form-group">
+                                <label>Rating:</label>
+                                <div class="star-rating">
+                                    <span class="star" data-rating="1">★</span>
+                                    <span class="star" data-rating="2">★</span>
+                                    <span class="star" data-rating="3">★</span>
+                                    <span class="star" data-rating="4">★</span>
+                                    <span class="star" data-rating="5">★</span>
+                                </div>
+                                <input type="hidden" id="rating" name="rating" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewTitle">Review Title:</label>
+                                <input type="text" class="form-control" id="reviewTitle" name="title" placeholder="Enter review title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewText">Review:</label>
+                                <textarea class="form-control" id="reviewText" name="review" rows="4" placeholder="Write your review here..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Would you recommend this worker?</label>
+                                <div class="radio-group">
+                                    <label class="radio-inline">
+                                        <input type="radio" name="recommend" value="1"> Yes
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="recommend" value="0"> No
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" onclick="submitReview(${workerId})" class="btn btn-primary">Submit Review</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+        .star-rating {
+            font-size: 24px;
+            color: #ddd;
+            margin: 10px 0;
+        }
+        
+        .star-rating .star {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .star-rating .star:hover,
+        .star-rating .star.active {
+            color: #ffc107;
+        }
+        
+        .radio-group {
+            margin-top: 5px;
+        }
+        
+        .radio-inline {
+            margin-right: 15px;
+        }
+        </style>
+    `;
+    
+    $('#reviewModal').remove();
+    $('body').append(modalHtml);
+    $('#reviewModal').modal('show');
+    
+    // Star rating functionality
+    $('.star').on('click', function() {
+        var rating = $(this).data('rating');
+        $('#rating').val(rating);
+        
+        $('.star').removeClass('active');
+        for (var i = 1; i <= rating; i++) {
+            $('.star[data-rating="' + i + '"]').addClass('active');
+        }
+    });
+    
+    $('.star').on('mouseover', function() {
+        var rating = $(this).data('rating');
+        $('.star').removeClass('hover');
+        for (var i = 1; i <= rating; i++) {
+            $('.star[data-rating="' + i + '"]').addClass('hover').css('color', '#ffc107');
+        }
+    });
+    
+    $('.star-rating').on('mouseleave', function() {
+        $('.star').removeClass('hover').css('color', '');
+    });
+}
+
+// Submit Review Function
+function submitReview(workerId) {
+    var rating = $('#rating').val();
+    var title = $('#reviewTitle').val();
+    var review = $('#reviewText').val();
+    var recommend = $('input[name="recommend"]:checked').val();
+    var $workerSection = $('.review-section[data-worker-id="' + workerId + '"]');  
+
+
+
+    
+    if (rating == 0) {
+        $('#reviewForm').find('.form-group.has-error').removeClass('has-error');
+        $('#reviewForm').append('<div class="alert alert-danger">Please select a rating.</div>');
+        showAlert('error', 'Error!', 'Please select a rating',$workerSection);
+        return;
+    }
+    
+    if (!title.trim()) {
+        showAlert('error', 'Error!', 'Please enter a review title',$workerSection);
+        return;
+    }
+    
+    if (!review.trim()) {
+        showAlert('error', 'Error!', 'Please write a review', $workerSection);
+        return;
+    }
+    
+    showLoading();
+    
+    $.ajax({
+        url: 'index.php?route=extension/module/wk_skill_cust/review',
+        type: 'POST',
+        data: {
+            worker_id: workerId,
+            rating: rating,
+            title: title,
+            review: review,
+            recommend: recommend
+        },
+        dataType: 'json',
+        success: function(response) {
+            hideLoading();
+            $('#reviewModal').modal('hide');
+            
+            if (response.success) {
+
+              
+                showAlert('success', 'Success!', 'Review submitted successfully', $workerSection);
+                // Optionally refresh the page or update the UI
+                setTimeout(function() {
+                    location.reload();
+                }, 2000);
+            } else {
+                showAlert('error', 'Error!', response.error || 'Failed to submit review', $workerSection);
+            }
+        },
+        error: function() {
+            hideLoading();
+            showAlert('error', 'Error!', 'Something went wrong. Please try again.', $workerSection);
+        }
+    });
+}
+
+// Previous utility functions remain the same...
+</script>
+

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+  <name>wk_skill_cust</name>
+  <code>SkillMatchr</code>
+  <version>1.0</version>
+  <author>serviec_base</author>
+  <link>https://example.com</link>
+   <file path="admin/controller/common/column_left.php">
+    <operation>
+      <search><![CDATA[// Catalog]]></search>
+      <add position="before"><![CDATA[
+        if($this->config->get('module_wk_skill_cust_status')) {
+			$wk_skill_cust = array();
+			if ($this->user->hasPermission('access', 'extension/module/wk_skill_cust')) {
+				$wk_skill_cust[] = array(
+					'name'	   => $this->language->get('text_configuration'),
+					'href'     => $this->url->link('extension/module/wk_skill_cust', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+			if ($this->user->hasPermission('access', 'wk_skill_cust/customer')) {
+				$wk_skill_cust[] = array(
+					'name'	   => $this->language->get('text_customer'),
+					'href'     => $this->url->link('wk_skill_cust/customer', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+            if ($this->user->hasPermission('access', 'wk_skill_cust/skills')) {
+				$wk_skill_cust[] = array(
+					'name'	   => $this->language->get('skills'),
+					'href'     => $this->url->link('wk_skill_cust/skills', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($wk_skill_cust) {
+				$data['menus'][] = array(
+					'id'       => 'menu-wk_skill_cust',
+					'icon'	   => 'fa-cog',
+					'name'	   => $this->language->get('skill_cust'),
+					'href'     => '',
+					'children' => $wk_skill_cust
+				);
+			}
+		 }
+
+      ]]></add>
+    </operation>
+  </file>
+   <file path="admin/language/*/common/column_left.php">
+    <operation>
+      <search><![CDATA[$_['text_other_status']         = 'Other Statuses';]]></search>
+      <add position="after"><![CDATA[
+
+      $_['text_configuration']        = 'Configuration';
+      $_['text_customer']             = 'Customers';
+      $_['skill_cust']                = 'Skill Customer';
+      $_['skills']                    = 'Skills';
+       
+      ]]></add>
+    </operation>
+  </file>
+   <file path="catalog/controller/account/register.php">
+    <operation>
+      <search><![CDATA[$data['column_left'] = $this->load->controller('common/column_left');]]></search>
+      <add position="before"><![CDATA[
+
+        if($this->config->get('module_wk_skill_cust_status')) {
+		  $errors = isset($this->error) ? $this->error : [];
+          $data['wkskillcust'] = $this->load->controller('wk_skill_cust/account', $errors);
+		}
+       
+      ]]></add>
+    </operation>
+  </file>
+   <file path="catalog/controller/account/account.php">
+    <operation>
+      <search><![CDATA[$data['column_left'] = $this->load->controller('common/column_left');]]></search>
+      <add position="before"><![CDATA[
+
+     if($this->config->get('module_wk_skill_cust_status')) {
+            $data['skill_button'] = $this->load->controller('wk_skill_cust/button');
+		 }
+       
+      ]]></add>
+    </operation>
+  </file>
+   <file path="catalog/controller/account/register.php">
+    <operation>
+      <search><![CDATA[private function validate() {]]></search>
+      <add position="after"><![CDATA[
+
+       if (isset($this->request->post['worker']) && $this->request->post['worker'] == '1') {
+          // Validate date_of_birth (ensure it's a valid date and user is 18+)
+        if (empty($this->request->post['date_of_birth']) || strtotime($this->request->post['date_of_birth']) === false) {
+          $this->error['date_of_birth'] = $this->language->get('error_date_of_birth');
+        } else {
+          $age = (int)date_diff(date_create($this->request->post['date_of_birth']), date_create('today'))->y;
+         if ($age < 18) {
+            $this->error['date_of_birth'] = $this->language->get('error_age');
+        }
+      }
+
+      // Validate occupation (must not be empty or 0)
+       if (empty($this->request->post['occupation']) || !is_numeric($this->request->post['occupation'])) {
+        $this->error['occupation'] = $this->language->get('error_occupation');
+       }
+
+       // Validate price_per_day (must be numeric and positive)
+       if (!isset($this->request->post['price_per_day']) || !is_numeric($this->request->post['price_per_day']) || $this->request->post['price_per_day'] <= 0) {
+         $this->error['price_per_day'] = $this->language->get('error_price_per_day');
+       }
+
+      }
+       
+      ]]></add>
+    </operation>
+  </file>
+   <file path="catalog/model/account/customer.php">
+    <operation>
+      <search><![CDATA[if ($customer_group_info['approval']) {]]></search>
+      <add position="before"><![CDATA[
+
+         if($data['worker']) {
+		  $this->load->model('wk_skill_cust/skills');
+		  $this->model_wk_skill_cust_skills->addWorkerSkill($customer_id, $data);
+	    }
+       
+      ]]></add>
+    </operation>
+  </file>
+  <file path="catalog/model/account/register.twig">
+    <operation>
+      <search><![CDATA[{{ captcha }}]]></search>
+      <add position="before"><![CDATA[
+
+         {{ wkskillcust }}
+       
+      ]]></add>
+    </operation>
+  </file>
+   <file path="catalog/model/account/account.twig">
+    <operation>
+      <search><![CDATA[{% if success %}]]></search>
+      <add position="before"><![CDATA[
+
+         {{ skill_button }}
+       
+      ]]></add>
+    </operation>
+  </file>
+</modification>

@@ -1,0 +1,131 @@
+
+<div class="form-group">
+  <label class="col-sm-2 control-label">{{are_worker}}</label>
+  <div class="col-sm-10">
+    <label class="radio-inline">
+      <input type="radio" name="worker" value="1" {% if worker %}checked="checked"{% endif %} />
+      {{ text_yes }}
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="worker" value="0" {% if not worker %}checked="checked"{% endif %} />
+      {{ text_no }}
+    </label>
+  </div>
+</div>
+
+<fieldset id="worker-fieldset" style="display: {% if worker %}block{% else %}none{% endif %};">
+   <legend> {{ text_worker }} </legend>
+   <!-- Worker Profile Picture Upload -->
+<div class="form-group">
+  <label class="col-sm-2 control-label" for="worker-profile-pic">{{text_profile_pic}}</label>
+  <div class="col-sm-10">
+   <a href="" id="thumb-worker-image" data-toggle="image" class="img-thumbnail">
+       <img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" />
+    </a>
+          <input type="hidden" name="worker_image" value="{{ worker_image }}" id="input-worker-image" />
+  </div>
+</div>
+
+   <div class="form-group">
+        <label class="control-label col-sm-2" for="input-date-added">{{ entry_date_birth }}</label>
+          <div class="input-group date col-sm-10">
+          <input type="text" name="date_of_birth" value="{{ filter_date_added }}" placeholder="{{ entry_date_birth }}" data-date-format="YYYY-MM-DD" id="input-date-added" class="form-control" />
+          {% if date_of_birth_error %}
+        <div class="text-danger">{{ date_of_birth_error }}</div>
+        {%endif %}
+          <span class="input-group-btn">
+          <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+        </span> 
+      </div>
+    </div>
+
+
+  <!-- Price Per Day -->
+  <div class="form-group">
+    <label class="col-sm-2 control-label">{{text_price_per_day}}</label>
+    <div class="col-sm-10">
+      <input type="number" name="price_per_day" class="form-control" placeholder="{{ text_price }}" value="{{ price_per_day }}" />
+      {% if price_per_day_error %}
+        <div class="text-danger">{{ price_per_day_error }}</div>
+        {%endif %}
+       
+    </div>
+  </div>
+
+  <!-- Select Occupation -->
+ <div class="form-group">
+  <label class="col-sm-2 control-label" for="input-occupation">{{ entry_occupation }}</label>
+  <div class="col-sm-10">
+    <select name="occupation" id="input-occupation" class="form-control">
+      <option value="">{{ text_select }}</option>
+      {% for occupation in occupations %}
+        <option value="{{ occupation.id }}" {% if occupation_id == occupation.id %}selected{% endif %}>
+          {{ occupation.skill }}
+        </option>
+      {% endfor %}
+    </select>
+
+    {% if occupation_error %}
+      <div class="text-danger">{{ occupation_error }}</div>
+    {% endif %}
+  </div>
+</div>
+
+
+
+  <!-- Your additional fields here -->
+</fieldset>
+<script src="view/javascript/common.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="view/stylesheet/stylesheet.css" />
+
+<script>
+$('body').on('click', '[data-toggle="image"]', function (e) {
+  e.preventDefault();
+
+  var element = this;
+
+  $('#modal-image').remove();
+
+  $.ajax({
+    url: 'index.php?route=common/filemanager', // Make sure this route is accessible on frontend
+    dataType: 'html',
+    success: function (html) {
+      $('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+
+      $('#modal-image').modal('show');
+
+      $('#modal-image').on('click', 'a.thumbnail', function (e) {
+        e.preventDefault();
+
+        var image = $(this).attr('data-image'); // This must exist in filemanager output
+        var thumb = $(this).find('img').attr('src');
+
+        $(element).find('img').attr('src', thumb);
+        $(element).next('input').val(image); // ← this is what sets the POST value!
+
+        $('#modal-image').modal('hide');
+      });
+    }
+  });
+});
+
+
+</script>
+
+<script>
+  function toggleFieldset() {
+    var isWorker = $('input[name="worker"]:checked').val();
+    if (isWorker === "1") {
+      $('#worker-fieldset').show();
+    } else {
+      $('#worker-fieldset').hide();
+    }
+  }
+
+  // Run when the DOM is ready
+  $(document).ready(function() {
+    toggleFieldset(); // Initial check
+    $('input[name="worker"]').on('change', toggleFieldset); // On change
+  });
+
+</script>

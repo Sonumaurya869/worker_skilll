@@ -1,0 +1,33 @@
+<?php
+$_['heading_title'] = 'Skills';
+// Heading
+$_['are_worker']  = 'Are you a worker';
+$_['text_worker']  = 'Worker';
+$_['text_profile_pic']  = 'Worker Profile Picture';
+$_['text_price_per_day']      = 'Price Per Day';
+$_['text_price']      = 'Enter price in INR';
+$_['text_occupation']      = 'Select Your Occupation';
+$_['entry_occupation'] = 'Occupation';
+$_['text_select'] = '-- Select Occupation --';
+$_['text_error_occupation'] = 'Please select an occupation!';
+$_['entry_date_birth'] = 'Enter your date of birth';
+$_['error_date_of_birth']    = 'Date of birth is required!';
+$_['error_age']              = 'Worker must be at least 18 years old!';
+$_['error_occupation']       = 'Please select a valid occupation!';
+$_['error_price_per_day']    = 'Price per day must be a positive number!';
+$_['error_worker_image']     = 'Profile image is required!';
+$_['update_profile']         = 'Update Your Profile';
+$_['view_profile']           = 'View Your Profile';
+$_['text_success']           = 'Your profile has been updated successfully!';
+$_['text_error']             = 'Error!';
+$_['text_success_update']    = 'Your profile has been updated successfully!';
+$_['text_success_delete']    = 'Your profile has been deleted successfully!';
+$_['text_account_update']    = 'Account Update';
+$_['text_account']           = 'Account';
+$_['entry_firstname']        = 'First Name';
+$_['entry_lastname']         = 'Last Name';
+$_['entry_email']            = 'E-Mail';
+$_['entry_telephone']        = 'Telephone';
+$_['entry_status']           = 'Status';
+$_['text_enabled']          = 'Enabled';
+$_['text_disabled']         = 'Disabled';

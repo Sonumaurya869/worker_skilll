@@ -1,0 +1,204 @@
+{{ header }}
+<style>
+.reaction {
+  font-size: 1.2rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+.reaction:hover {
+  transform: scale(1.2);
+  text-decoration: none;
+}
+
+.reaction.active {
+  font-weight: bold;
+}
+</style>
+
+<div class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+
+  {% if success %}
+  <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}</div>
+  {% endif %}
+  <div class="row">{{ column_left }}
+    {% if column_left and column_right %}
+    {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'col-sm-9' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+    <div id="content" class="{{ class }}">{{ content_top }}
+
+
+    <div class="container py-5">
+  <div class="card shadow-lg border-0 rounded-3">
+    <div class="card-body p-4">
+      <div class="row">
+        <!-- Profile Image -->
+        <div class="col-md-4 text-center">
+          <img src="{{ thumb }}" alt="Profile Image" class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px;">
+          <h4 class="mt-3">{{ firstname }} {{ lastname }}</h4>
+          <p class="text-muted">{{ occupation_name }}</p>
+        </div>
+
+        <!-- Profile Info -->
+        <div class="col-md-8">
+          <h5 class="mb-3">Profile Details</h5>
+          <table class="table table-striped">
+            <tbody>
+              <tr>
+                <th>Email</th>
+                <td>{{ email }}</td>
+              </tr>
+              <tr>
+                <th>Telephone</th>
+                <td>{{ telephone }}</td>
+              </tr>
+              <tr>
+                <th>Date of Birth</th>
+                <td>{{ date_of_birth }}</td>
+              </tr>
+              <tr>
+                <th>Gender</th>
+                <td>{{ gender|capitalize }}</td>
+              </tr>
+              <tr>
+                <th>Experience</th>
+                <td>{{ experience }} years</td>
+              </tr>
+              <tr>
+                <th>Work Range</th>
+                <td>{{ range }} km</td>
+              </tr>
+              <tr>
+                <th>Price per Day</th>
+                <td>${{ price_per_day }}</td>
+              </tr>
+              <tr>
+                <th>Status</th>
+                <td>{{ wk_status == '1' ? 'Available' : 'Not Available' }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h5 class="mt-4">Work Description</h5>
+          <p class="border p-3 bg-light rounded">{{ description }}</p>
+
+          <h5 class="mt-4">Busy Dates</h5>
+          {% if busy_dates %}
+            <ul class="list-group list-group-flush">
+              {% for date in busy_dates %}
+                <li class="list-group-item">{{ date }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">No busy dates.</p>
+          {% endif %}
+        </div>
+
+
+<hr class="my-5">
+<h4 class="mb-3">⭐ Worker Reviews</h4>
+
+<div class="mb-4">
+  <strong>Average Rating:</strong>
+  <span class="text-warning h5">
+    {% for i in 1..5 %}
+      {% if i <= average_rating %}
+        ★
+      {% else %}
+        ☆
+      {% endif %}
+    {% endfor %}
+  </span>
+  <span class="text-muted">({{ total_reviews }} Reviews)</span>
+</div>
+
+{% if reviews %}
+  {% for review in reviews %}
+  <div class="card mb-3 shadow-sm border-0">
+    <div class="card-body">
+      <div style="display: flex; justify-content: space-between;">
+        <h5 class="mb-0">
+          {{ review.customer_name }}
+        </h5>
+        <small class="text-muted">{{ review.date_added }}</small>
+      </div>
+
+      {% if review.title %}
+        <p class="fw-semibold text-dark mb-1">{{ review.title }}</p>
+      {% endif %}
+      <p class="card-text text-muted">{{ review.review }}</p>
+
+      <div class="d-flex justify-content-end align-items-center">
+       <div class="reaction-buttons d-flex align-items-center gap-3">
+          <button class="reaction like-btn border-0 bg-transparent text-primary" data-review-id="{{ review.review_id }}">
+    👍 <span id="like-count-{{ review.review_id }}">{{ review.likes }}</span>
+          </button>
+        <button class="reaction dislike-btn border-0 bg-transparent text-danger" data-review-id="{{ review.review_id }}">
+    👎 <span id="dislike-count-{{ review.review_id }}">{{ review.dislikes }}</span>
+        </button>
+      </div>
+
+      </div>
+    </div>
+  </div>
+{% endfor %}
+
+{% else %}
+  <p class="text-muted">No reviews available for this worker yet.</p>
+{% endif %}
+
+      </div>
+    </div>
+
+    <div class="card-footer bg-white text-center">
+      <a href="{{ back_url }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{{ content_bottom }}</div>
+{{ column_right }}</div>
+
+<script>
+$(document).ready(function () {
+  $('.like-btn, .dislike-btn').on('click', function () {
+    var $btn = $(this);
+    var reviewId = $btn.data('review-id');
+    var action = $btn.hasClass('like-btn') ? 'like' : 'dislike';
+
+    $.ajax({
+      url: 'index.php?route=wk_skill_cust/review_' + action,
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ review_id: reviewId }),
+      success: function (data) {
+        if (data.success) {
+          $('#' + action + '-count-' + reviewId).text(data.count);
+
+          // Visual feedback toggle
+          $('.like-btn[data-review-id="' + reviewId + '"], .dislike-btn[data-review-id="' + reviewId + '"]').removeClass('active');
+          $btn.addClass('active');
+        } else {
+          alert(data.error || 'Action failed');
+        }
+      },
+      error: function () {
+        alert('Something went wrong. Please try again.');
+      }
+    });
+  });
+});
+</script>
+
+
+
+</div>
+{{ footer }}

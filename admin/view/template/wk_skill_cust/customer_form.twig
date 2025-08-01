@@ -1,0 +1,179 @@
+{{ header }}{{ column_left }}
+
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-customer" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid"> {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-customer" class="form-horizontal">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
+            <li><a href="#tab-affiliate" data-toggle="tab">{{ tab_affiliate }}</a></li>
+            {% if customer_id %}
+            <li><a href="#tab-history" data-toggle="tab">{{ tab_history }}</a></li>
+            <li><a href="#tab-transaction" data-toggle="tab">{{ tab_transaction }}</a></li>
+            <li><a href="#tab-reward" data-toggle="tab">{{ tab_reward }}</a></li>
+            <li><a href="#tab-ip" data-toggle="tab">{{ tab_ip }}</a></li>
+            {% endif %}
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-general">
+             <fieldset>
+                <legend>{{ text_skill_details }}</legend>
+
+
+         <div class="form-group">
+          <label class="col-sm-2 control-label" for="input-occupation">{{ entry_occupation }}</label>
+            <div class="col-sm-10">
+              <select name="occupation_id" id="input-occupation" class="form-control">
+               <option value="">{{ text_select }}</option>
+               {% for occupation in occupations %}
+                  {% if occupation.id == occupation_id %}
+                     <option value="{{ occupation.id }}" selected="selected">{{ occupation.skill }}</option>
+                  {% else %}
+                     <option value="{{ occupation.id }}">{{ occupation.skill }}</option>
+                  {% endif %}
+               {% endfor %}
+              </select>
+           </div>
+         </div>
+
+        <div class="form-group">
+           <label class="col-sm-2 control-label" for="input-price-per-day">{{ entry_price_per_day }}</label>
+            <div class="col-sm-10">
+               <input type="text" name="price_per_day" value="{{ price_per_day }}" placeholder="{{ entry_price_per_day }}" id="input-price-per-day" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="input-date-of-birth">{{ entry_date_of_birth }}</label>
+           <div class="col-sm-10">
+            <div class="input-group date">
+              <input type="text" name="date_of_birth" value="{{ date_of_birth }}" placeholder="{{ entry_date_of_birth }}" data-date-format="YYYY-MM-DD" id="input-date-of-birth" class="form-control" />
+               <span class="input-group-btn">
+                <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+               </span>
+             </div>
+           </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="input-image">{{ entry_image }}</label>
+           <div class="col-sm-10">
+            <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail">
+           <img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" />
+          </a>
+         <input type="hidden" name="image" value="{{ image }}" id="input-image" />
+         </div>
+        </div>
+
+      <div class="form-group">
+         <label class="col-sm-2 control-label" for="input-skill-status">{{ entry_status }}</label>
+           <div class="col-sm-10">
+              <select name="wk_status" id="input-skill-status" class="form-control">
+              {% if wk_status %}
+                 <option value="1" selected="selected">{{ text_enabled }}</option>
+                 <option value="0">{{ text_disabled }}</option>
+              {% else %}
+                 <option value="1">{{ text_enabled }}</option>
+                 <option value="0" selected="selected">{{ text_disabled }}</option>
+              {% endif %}
+            </select>
+          </div>
+       </div>
+      </fieldset>
+    </div>
+    <div class="tab-pane" id="tab-affiliate">
+          <fieldset>
+                <div class="form-group">
+                   <label for="input-range" class="col-sm-2">Select Range (KM)</label>
+                   <div class="col-sm-10">
+                    <input type="range" name="range" id="input-range" class="form-control-range" min="1" max="50" value="{{ range | default(10) }}" oninput="$('#range-value').text(this.value + ' KM')" />
+                     <small>Selected: <span id="range-value">{{ range | default(10) }} KM</span></small>
+                      {% if error_range %}
+                         <div class="text-danger">{{ error_range }}</div>
+                    {% endif %}
+                      </div>
+                </div>
+
+                 <div class="form-group">
+                   <label for="availability-dates" class="col-sm-2">Select Busy Dates</label>
+                   <div class="col-sm-10">
+                     <input type="text" id="availability-dates" name="busy_dates" class="form-control" placeholder="Choose busy dates" />
+                      <small class="form-text text-muted">Select all dates you are <strong>not available</strong>.</small>
+                       <input type="hidden" name="selected_busy_dates" id="selected-busy-dates" value="{{ busy_dates }}"  />
+                        {% if error_range %}
+                            <div class="text-danger">{{ error_range }}</div>
+                        {% endif %}
+                        </div>
+                  </div>
+                 <div class="form-group">
+                      <label for="input-experience" class="col-sm-2">Experience (Years)</label>
+                      <div class="col-sm-10">
+                        <input type="number" name="experience" value="{{ experience }}" placeholder="Enter years of experience" id="input-experience" class="form-control" min="0" />
+                       {% if error_experience %}
+                            <div class="text-danger">{{ error_experience }}</div>
+                       {% endif %}
+                       </div>
+                   </div>
+
+                  <div class="form-group">
+                   <label for="input-description" class="col-sm-2">Work Description</label>
+                   <div class="col-sm-10">
+                     <textarea name="work_description" id="input-description" class="form-control" rows="4" placeholder="Describe your work experience, skills, or specialties...">{{ work_description }}</textarea>
+                     {% if error_work_description %}
+                       <div class="text-danger">{{ error_work_description }}</div>
+                     {% endif %}
+                   </div>
+                  </div>
+              </fieldset>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script type="text/javascript"><!--
+  $('.date').datetimepicker({
+    language: '{{ datepicker }}',
+    pickTime: false
+  });
+
+   var existingDates = document.getElementById("selected-busy-dates").value;
+    var defaultDates = existingDates ? existingDates.split(',') : [];
+
+  document.addEventListener("DOMContentLoaded", function () {
+    flatpickr("#availability-dates", {
+      mode: "multiple",
+      dateFormat: "Y-m-d",
+      defaultDate: defaultDates, 
+      onChange: function (selectedDates, dateStr) {
+        document.getElementById("selected-busy-dates").value = dateStr;
+      }
+    });
+  });
+  //--></script>
+  </div>
+{{ footer }} 

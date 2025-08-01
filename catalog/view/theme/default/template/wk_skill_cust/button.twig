@@ -1,0 +1,106 @@
+
+ {% if  worker == 1 %}
+    
+
+<style>
+.btn-update-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    margin: 0 10px;
+}
+
+.btn-update-profile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-update-profile:active {
+    transform: translateY(-1px);
+}
+
+.btn-view-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    margin: 0 10px;
+}
+
+.btn-view-profile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(40, 167, 69, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-view-profile:active {
+    transform: translateY(-1px);
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .button-container {
+        flex-direction: column;
+    }
+    
+    .btn-update-profile,
+    .btn-view-profile {
+        margin: 5px 0;
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="row">
+  <div class="col-12 text-center">
+    <div class="button-container">
+      <a href="{{ update_profile_url }}" class="btn-update-profile">
+        <i class="fas fa-user-edit"></i>
+        <span>{{update_profile}}</span>
+        <i class="fas fa-arrow-right"></i>
+      </a>
+      
+      <a href="{{ view_profile_url }}" class="btn-view-profile">
+        <i class="fas fa-eye"></i>
+        <span>{{view_profile}}</span>
+        <i class="fas fa-external-link-alt"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+{% endif %}
