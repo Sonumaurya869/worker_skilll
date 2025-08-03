@@ -1,25 +1,28 @@
 <?php
 class ModelWkSkillCustCustomer extends Model {
 	public function addCustomer($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "customer SET customer_group_id = '" . (int)$data['customer_group_id'] . "', firstname = '" . $this->db->escape($data['firstname']) . "', lastname = '" . $this->db->escape($data['lastname']) . "', email = '" . $this->db->escape($data['email']) . "', telephone = '" . $this->db->escape($data['telephone']) . "', custom_field = '" . $this->db->escape(isset($data['custom_field']) ? json_encode($data['custom_field']) : json_encode(array())) . "', newsletter = '" . (int)$data['newsletter'] . "', salt = '" . $this->db->escape($salt = token(9)) . "', password = '" . $this->db->escape(sha1($salt . sha1($salt . sha1($data['password'])))) . "', status = '" . (int)$data['status'] . "', safe = '" . (int)$data['safe'] . "', date_added = NOW()");
+	  $skill= $this->getSkill($data['occupation_id']);
 
-		$customer_id = $this->db->getLastId();
+      $this->db->query("INSERT INTO `" . DB_PREFIX . "worker_skill` SET 
+        customer_id = '" . (int)$data['customer_id'] . "',
+        occupation_id = '" . (int)$data['occupation_id'] . "',
+        skill = '" . $this->db->escape($skill) . "',
+        price_per_day = '" . (float)$data['price_per_day'] . "',
+        date_of_birth = '" . $this->db->escape($data['date_of_birth']) . "',
+        image = '" . $this->db->escape($data['image']) . "',
+        wk_status = '" . $this->db->escape($data['wk_status']) . "',
+        date_added = NOW()
+     ");
 
-		if (isset($data['address'])) {
-			foreach ($data['address'] as $address) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "address SET customer_id = '" . (int)$customer_id . "', firstname = '" . $this->db->escape($address['firstname']) . "', lastname = '" . $this->db->escape($address['lastname']) . "', company = '" . $this->db->escape($address['company']) . "', address_1 = '" . $this->db->escape($address['address_1']) . "', address_2 = '" . $this->db->escape($address['address_2']) . "', city = '" . $this->db->escape($address['city']) . "', postcode = '" . $this->db->escape($address['postcode']) . "', country_id = '" . (int)$address['country_id'] . "', zone_id = '" . (int)$address['zone_id'] . "', custom_field = '" . $this->db->escape(isset($address['custom_field']) ? json_encode($address['custom_field']) : json_encode(array())) . "'");
+	  $customer_id = $this->db->getLastId();
 
-				if (isset($address['default'])) {
-					$address_id = $this->db->getLastId();
-
-					$this->db->query("UPDATE " . DB_PREFIX . "customer SET address_id = '" . (int)$address_id . "' WHERE customer_id = '" . (int)$customer_id . "'");
-				}
-			}
-		}
-		
-		if ($data['affiliate']) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "customer_affiliate SET customer_id = '" . (int)$customer_id . "', company = '" . $this->db->escape($data['company']) . "', website = '" . $this->db->escape($data['website']) . "', tracking = '" . $this->db->escape($data['tracking']) . "', commission = '" . (float)$data['commission'] . "', tax = '" . $this->db->escape($data['tax']) . "', payment = '" . $this->db->escape($data['payment']) . "', cheque = '" . $this->db->escape($data['cheque']) . "', paypal = '" . $this->db->escape($data['paypal']) . "', bank_name = '" . $this->db->escape($data['bank_name']) . "', bank_branch_number = '" . $this->db->escape($data['bank_branch_number']) . "', bank_swift_code = '" . $this->db->escape($data['bank_swift_code']) . "', bank_account_name = '" . $this->db->escape($data['bank_account_name']) . "', bank_account_number = '" . $this->db->escape($data['bank_account_number']) . "', custom_field = '" . $this->db->escape(isset($data['custom_field']['affiliate']) ? json_encode($data['custom_field']['affiliate']) : json_encode(array())) . "', status = '" . (int)$data['affiliate'] . "', date_added = NOW()");
-		}
+	    $this->db->query("INSERT INTO `" . DB_PREFIX . "worker_details` SET 
+        customer_id = '" . (int)$data['customer_id'] . "',
+        range_km = '" . (int)$data['range'] . "',
+        experience = '" . (float)$data['experience'] . "',
+        busy_date = '" . $data['busy_dates'] . "',
+        description = '" . $this->db->escape($data['work_description']) . "'
+       ");
 		
 		return $customer_id;
 	}
@@ -27,9 +30,8 @@ class ModelWkSkillCustCustomer extends Model {
 
 	
 	public function editSkill($skill_id, $data) {
-
 		 $skill= $this->getSkill($data['occupation_id']);
-         $this->db->query("UPDATE " . DB_PREFIX . "worker_skill SET occupation_id = '" . (int)$data['occupation_id'] . "', skill = '" . $this->db->escape($skill) . "', price_per_day = '" . (float)$data['price_per_day'] . "', date_of_birth = '" . $this->db->escape($data['date_of_birth']) . "', image = '" . $this->db->escape($data['image']) . "', wk_status = '" .$data['wk_status'] . "' WHERE id = '" . (int)$skill_id . "'");
+         $this->db->query("UPDATE " . DB_PREFIX . "worker_skill SET occupation_id = '" . (int)$data['occupation_id'] . "', skill = '" . $this->db->escape($skill) . "', price_per_day = '" . (float)$data['price_per_day'] . "', date_of_birth = '" . $this->db->escape($data['date_of_birth']) . "', image = '" . $this->db->escape($data['image']) . "', wk_status = '" .$data['wk_status'] . "' WHERE customer_id = '" . (int)$skill_id . "'");
 	
 		  $details = $this->db->query("SELECT * FROM " . DB_PREFIX . "worker_details WHERE customer_id = '" . (int)$skill_id . "'");
  
@@ -62,20 +64,23 @@ class ModelWkSkillCustCustomer extends Model {
 		$this->db->query("UPDATE " . DB_PREFIX . "customer SET token = '" . $this->db->escape($token) . "' WHERE customer_id = '" . (int)$customer_id . "'");
 	}
 
-	public function deleteCustomer($customer_id) {
-		$this->db->query("DELETE FROM " . DB_PREFIX . "customer WHERE customer_id = '" . (int)$customer_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_activity WHERE customer_id = '" . (int)$customer_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_affiliate WHERE customer_id = '" . (int)$customer_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_approval WHERE customer_id = '" . (int)$customer_id . "'");
- 		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_history WHERE customer_id = '" . (int)$customer_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_reward WHERE customer_id = '" . (int)$customer_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_transaction WHERE customer_id = '" . (int)$customer_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_ip WHERE customer_id = '" . (int)$customer_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "address WHERE customer_id = '" . (int)$customer_id . "'");
+	public function deleteWorker($customer_id) {
+		$this->db->query("DELETE FROM " . DB_PREFIX . "worker_reviews WHERE worker_id = '" . (int)$customer_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "worker_likes WHERE worker_id = '" . (int)$customer_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "worker_skill WHERE customer_id = '" . (int)$customer_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "worker_details WHERE customer_id = '" . (int)$customer_id . "'");
 	}
 
 	public function getCustomer($customer_id) {
-       $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "worker_skill ws LEFT JOIN " . DB_PREFIX . "worker_details wd ON ws.customer_id = wd.customer_id WHERE ws.customer_id = '" . (int)$customer_id . "'");
+       $query = $this->db->query("
+         SELECT ws.*, wd.*, c.firstname, c.lastname, c.email 
+        FROM " . DB_PREFIX . "worker_skill ws 
+         LEFT JOIN " . DB_PREFIX . "worker_details wd 
+        ON ws.customer_id = wd.customer_id 
+         LEFT JOIN " . DB_PREFIX . "customer c 
+        ON ws.customer_id = c.customer_id 
+         WHERE ws.customer_id = '" . (int)$customer_id . "'
+       ");
 		return $query->row;
 	}
 

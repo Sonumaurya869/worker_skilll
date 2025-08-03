@@ -14,14 +14,15 @@ class ControllerWkSkillCustCustomer extends Controller {
 	}
 
 	public function add() {
-		$this->load->language('customer/customer');
+		$this->load->language('wk_skill_cust/customer');
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$this->load->model('customer/customer');
+		$this->load->model('wk_skill_cust/customer');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			$this->model_customer_customer->addCustomer($this->request->post);
+
+			$this->model_wk_skill_cust_customer->addCustomer($this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -63,7 +64,7 @@ class ControllerWkSkillCustCustomer extends Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$this->response->redirect($this->url->link('customer/customer', 'user_token=' . $this->session->data['user_token'] . $url, true));
+			$this->response->redirect($this->url->link('wk_skill_cust/customer', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
 		$this->getForm();
@@ -77,7 +78,7 @@ class ControllerWkSkillCustCustomer extends Controller {
 		$this->load->model('wk_skill_cust/customer');
   
 	 	if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			$this->model_wk_skill_cust_customer->editSkill($this->request->get['skill_id'], $this->request->post);
+			$this->model_wk_skill_cust_customer->editSkill($this->request->get['worker_id'], $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -110,11 +111,11 @@ class ControllerWkSkillCustCustomer extends Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$this->load->model('customer/customer');
+		$this->load->model('wk_skill_cust/customer');
 
 		if (isset($this->request->post['selected']) && $this->validateDelete()) {
 			foreach ($this->request->post['selected'] as $customer_id) {
-				$this->model_customer_customer->deleteCustomer($customer_id);
+				$this->model_wk_skill_cust_customer->deleteWorker($customer_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -157,7 +158,7 @@ class ControllerWkSkillCustCustomer extends Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$this->response->redirect($this->url->link('customer/customer', 'user_token=' . $this->session->data['user_token'] . $url, true));
+			$this->response->redirect($this->url->link('wk_skill_cust/customer', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
 		$this->getList();
@@ -329,7 +330,6 @@ class ControllerWkSkillCustCustomer extends Controller {
 		$customer_total = $this->model_wk_skill_cust_customer->getTotalCustomers($filter_data);
 
 		$results = $this->model_wk_skill_cust_customer->getCustomers($filter_data);
-
 		foreach ($results as $result) {
 			$login_info = $this->model_customer_customer->getTotalLoginAttempts($result['email']);
 
@@ -354,7 +354,7 @@ class ControllerWkSkillCustCustomer extends Controller {
 			}
 
 			$data['customers'][] = array(
-				'id'             => $result['id'],
+				'id'             => $result['customer_id'],
 				'customer_id'    => $result['customer_id'],
 				'name'           => $result['name'],
 				'email'          => $result['email'],
@@ -363,7 +363,7 @@ class ControllerWkSkillCustCustomer extends Controller {
 				'date_added'     => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'unlock'         => $unlock,
 				'store'          => $store_data,
-				'edit'           => $this->url->link('wk_skill_cust/customer/edit', 'user_token=' . $this->session->data['user_token'] . '&skill_id=' . $result['id'] . $url, true)
+				'edit'           => $this->url->link('wk_skill_cust/customer/edit', 'user_token=' . $this->session->data['user_token'] . '&worker_id=' . $result['customer_id'] . $url, true)
 			);
 		}
 
@@ -480,14 +480,15 @@ class ControllerWkSkillCustCustomer extends Controller {
 	}
 
 	protected function getForm() {
-		$data['text_form'] = !isset($this->request->get['customer_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+
+		$data['text_form'] = !isset($this->request->get['worker_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
 		$data['user_token'] = $this->session->data['user_token'];
 
-		if (isset($this->request->get['skill_id'])) {
-			$data['skill_id'] = (int)$this->request->get['skill_id'];
+		if (isset($this->request->get['worker_id'])) {
+			$data['worker_id'] = (int)$this->request->get['worker_id'];
 		} else {
-			$data['skill_id'] = 0;
+			$data['worker_id'] = 0;
 		}
 
 		if (isset($this->error['warning'])) {
@@ -528,21 +529,42 @@ class ControllerWkSkillCustCustomer extends Controller {
 			'text' => $this->language->get('heading_title'),
 			'href' => $this->url->link('wk_skill_cust/customer', 'user_token=' . $this->session->data['user_token'] . $url, true)
 		);
-
-		if (!isset($this->request->get['skill_id'])) {
+        $data['readonly']=0;
+		$data['disabled'] =0;
+		if (!isset($this->request->get['worker_id'])) {
 			$data['action'] = $this->url->link('wk_skill_cust/customer/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		} else {
-			$data['action'] = $this->url->link('wk_skill_cust/customer/edit', 'user_token=' . $this->session->data['user_token'] . '&skill_id=' . $this->request->get['skill_id'] . $url, true);
+			$data['readonly'] = 1;
+		    $data['disabled'] =1;
+
+			$data['action'] = $this->url->link('wk_skill_cust/customer/edit', 'user_token=' . $this->session->data['user_token'] . '&worker_id=' . $this->request->get['worker_id'] . $url, true);
 		}
 
 		$data['cancel'] = $this->url->link('wk_skill_cust/customer', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
-		if (isset($this->request->get['skill_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
-			$customer_info = $this->model_wk_skill_cust_customer->getCustomer($this->request->get['skill_id']);
-		   
+		if (isset($this->request->get['worker_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
+			$customer_info = $this->model_wk_skill_cust_customer->getCustomer($this->request->get['worker_id']);
+	
 		}
+	
+        if (isset($this->request->post['customer'])) {
+            $data['customer'] = $this->request->post['customer'];
+        } elseif (!empty($customer_info)) {
+            $data['customer'] = $customer_info['firstname'] .' '.  $customer_info['lastname'] ;
+        } else {
+             $data['customer'] = '';
+        }
+	 
 
-	    if (isset($this->request->post['wk_status'])) {
+	     if (isset($this->request->post['customer_id'])) {
+            $data['customer_id'] = $this->request->post['customer_id'];
+        } elseif (!empty($customer_info)) {
+            $data['customer_id'] = $customer_info['customer_id'];
+        } else {
+             $data['customer_id'] = 0;
+        }
+
+        if (isset($this->request->post['wk_status'])) {
          $data['wk_status'] = $this->request->post['wk_status'];
          } elseif (!empty($customer_info)) {
             $data['wk_status'] = $customer_info['wk_status'];
@@ -583,14 +605,11 @@ class ControllerWkSkillCustCustomer extends Controller {
              $data['busy_dates'] = '';
         }
 
-        // For displaying back in the form (convert back to array if needed)
        if (!empty($data['busy_dates'])) {
-          // If stored as comma-separated string, convert to array for display
             $data['busy_dates_array'] = explode(',', $data['busy_dates']);
         } else {
              $data['busy_dates_array'] = array();
           }
-//work_description
 
         if (isset($this->request->post['work_description'])) {
 			$data['work_description'] = $this->request->post['work_description'];
@@ -599,9 +618,6 @@ class ControllerWkSkillCustCustomer extends Controller {
 		} else {
 			$data['work_description'] = '';
 		}
-
-
-
 
         if (isset($this->request->post['occupation_id'])) {
               $data['occupation_id'] = $this->request->post['occupation_id'];
@@ -669,6 +685,10 @@ class ControllerWkSkillCustCustomer extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+	   if (empty($this->request->post['customer_id']) || !is_numeric($this->request->post['customer_id'])) {
+        $this->error['customer_id'] = $this->language->get('error_customer_select');
+       }
+
 
 	    if (empty($this->request->post['date_of_birth']) || strtotime($this->request->post['date_of_birth']) === false) {
           $this->error['date_of_birth'] = $this->language->get('error_date_of_birth');
@@ -679,12 +699,10 @@ class ControllerWkSkillCustCustomer extends Controller {
          }
         }
 
-      // Validate occupation (must not be empty or 0)
        if (empty($this->request->post['occupation_id']) || !is_numeric($this->request->post['occupation_id'])) {
         $this->error['occupation'] = $this->language->get('error_occupation');
        }
 
-       // Validate price_per_day (must be numeric and positive)
        if (!isset($this->request->post['price_per_day']) || !is_numeric($this->request->post['price_per_day']) || $this->request->post['price_per_day'] <= 0) {
          $this->error['price_per_day'] = $this->language->get('error_price_per_day');
        }

@@ -28,18 +28,25 @@
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-customer" class="form-horizontal">
           <ul class="nav nav-tabs">
             <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
-            <li><a href="#tab-affiliate" data-toggle="tab">{{ tab_affiliate }}</a></li>
-            {% if customer_id %}
-            <li><a href="#tab-history" data-toggle="tab">{{ tab_history }}</a></li>
-            <li><a href="#tab-transaction" data-toggle="tab">{{ tab_transaction }}</a></li>
-            <li><a href="#tab-reward" data-toggle="tab">{{ tab_reward }}</a></li>
-            <li><a href="#tab-ip" data-toggle="tab">{{ tab_ip }}</a></li>
-            {% endif %}
+            <li><a href="#tab-affiliate" data-toggle="tab">{{ tab_worker_details }}</a></li>
           </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="tab-general">
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-customer">{{ entry_customer }}</label>
+                <div class="col-sm-10">
+                <input type="text" name="customer" value="{{ customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control"
+                   {% if readonly %}readonly{% endif %}
+                   {% if disabled %}disabled{% endif %}
+                 />
+                  <input type="hidden" name="customer_id" value="{{ customer_id }}" />
+                </div>
+              </div>
+
+
              <fieldset>
-                <legend>{{ text_skill_details }}</legend>
+        <legend>{{ text_skill_details }}</legend>
 
 
          <div class="form-group">
@@ -155,6 +162,7 @@
   </div>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
   <script type="text/javascript"><!--
   $('.date').datetimepicker({
     language: '{{ datepicker }}',
@@ -174,6 +182,30 @@
       }
     });
   });
-  //--></script>
+ 
+$('input[name=\'customer\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=customer/customer/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['customer_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'customer\']').val(item['label']);
+    $('input[name=\'customer_id\']').val(item['value']);
+	}
+});
+
+ //--></script>  
+  
+
   </div>
 {{ footer }} 

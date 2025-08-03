@@ -43,7 +43,7 @@ $_['column_total']              = 'Total Accounts';
 $_['column_action']             = 'Action';
 
 // Entry
-$_['entry_customer_group']      = 'Customer Group';
+$_['entry_customer']            = 'Customer Name';
 $_['entry_firstname']           = 'First Name';
 $_['entry_lastname']            = 'Last Name';
 $_['entry_email']               = 'E-Mail';
@@ -118,3 +118,5 @@ $_['entry_price_per_day']       =  'Price Per Day';
 $_['entry_occupation']         =  'Occupation';
 $_['entry_date_of_birth']       = 'Date of Birth';
 $_['entry_image']               = 'Image';
+$_['error_customer_select']     = 'please select customer';
+$_['tab_worker_details']        = 'Worker Details';

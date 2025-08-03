@@ -449,8 +449,8 @@ document.getElementById('hireWorkerForm').addEventListener('submit', function(ev
       } else {
         showAlert('error', 'Error!', response.error || 'Failed to send hiring request.');
       }
-    },
-    error: function() {
+    }, 
+     error: function() {
       hideLoading();
       $('#hireWorkerModal').modal('hide'); // Hide the modal
       showAlert('error', 'Error!', 'Something went wrong. Please try again.');

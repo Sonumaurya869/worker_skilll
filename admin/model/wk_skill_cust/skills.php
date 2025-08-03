@@ -3,37 +3,40 @@ class ModelWkSkillCustSkills extends Model {
 
 
     public function install() {
-        // $this->db->query("
-        //     CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "wk_skill_cust` (
-        //       `id` int(11) NOT NULL AUTO_INCREMENT,
-        //       `skill` varchar(255) NOT NULL,
-        //       `status` tinyint(1) NOT NULL,
-        //       PRIMARY KEY (`id`)
-        //     ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-        // ");
+        $this->db->query("
+            CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "wk_skill_cust` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `skill` varchar(255) NOT NULL,
+              `wk_status` tinyint(1) NOT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+        ");
 
+       $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "worker_reviews` (
+            `review_id` INT(11) NOT NULL AUTO_INCREMENT,
+            `customer_id` INT(11) NOT NULL,
+            `worker_id` INT(11) NOT NULL,
+            `rating` TINYINT(1) NOT NULL,
+            `title` VARCHAR(255) NOT NULL,
+            `review` TEXT NOT NULL,
+            `recommend` TINYINT(1) NOT NULL DEFAULT 0,
+            `status` INT(11) NOT NULL,
+            `date_added` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`review_id`)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+      ");
 
-//         CREATE TABLE `oc_worker_reviews` (
-//     `review_id` INT(11) NOT NULL AUTO_INCREMENT,
-//     `worker_id` INT(11) NOT NULL,
-//     `rating` TINYINT(1) NOT NULL,
-//     `title` VARCHAR(255) NOT NULL,
-//     `review` TEXT NOT NULL,
-//     `recommend` TINYINT(1) NOT NULL DEFAULT 0,
-//     `date_added` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//     PRIMARY KEY (`review_id`)
-// ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
-
-// CREATE TABLE `worker_likes` (
-//   `id` int(11) NOT NULL,
-//   `worker_id` int(11) NOT NULL,
-//   `user_id` int(11) NOT NULL,
-//   `status` enum('like','dislike') NOT NULL,
-//   `date_added` datetime NOT NULL DEFAULT current_timestamp()
-// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-         
+      $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "worker_likes` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `worker_id` INT(11) NOT NULL,
+            `user_id` INT(11) NOT NULL,
+            `status` ENUM('like','dislike') NOT NULL,
+            `date_added` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    ");     
         $this->db->query("
         CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "worker_skill` (
             `id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -50,22 +53,69 @@ class ModelWkSkillCustSkills extends Model {
        ");
 
         $this->db->query("
-            CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "hire_request` (
+            CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "hire_requests` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `worker_id` INT,
                 `customer_name` VARCHAR(255),
                 `customer_mobile` VARCHAR(50),
                 `customer_address` TEXT,
-                `date_added` DATETIME DEFAULT CURRENT_TIMESTAMP
+                `seen` INT(10) NOT NULL,
+                `popup_seen` INT(10) NOT NULL,
+                `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ");
 
-    }
+         $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "worker_details` (
+            `customer_id` INT(10) NOT NULL,
+            `range_km` INT(10) NOT NULL,
+            `experience` INT(10) NOT NULL,
+            `busy_date` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+            `description` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    ");
 
+    $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "worker_hire_history` (
+            `history_id` INT(11) NOT NULL AUTO_INCREMENT,
+            `customer_id` INT(11) NOT NULL,
+            `customer_name` VARCHAR(255) NOT NULL,
+            `customer_mobile` VARCHAR(50) NOT NULL,
+            `customer_address` TEXT NOT NULL,
+            `worker_id` INT(11) NOT NULL,
+            `worker_name` VARCHAR(255) NOT NULL,
+            `occupation_id` INT(11) NOT NULL,
+            `skill` VARCHAR(64) NOT NULL,
+            `price_per_day` DECIMAL(10,2) NOT NULL,
+            `date_of_birth` DATE NOT NULL,
+            `image` VARCHAR(255) NOT NULL,
+            `range_km` INT(10) NOT NULL,
+            `experience` INT(10) NOT NULL,
+            `description` TEXT NOT NULL,
+            `avg_rating` DECIMAL(2,1) NOT NULL DEFAULT 0.0,
+            `review_count` INT(11) NOT NULL DEFAULT 0,
+            `likes` INT(11) NOT NULL DEFAULT 0,
+            `dislikes` INT(11) NOT NULL DEFAULT 0,
+            `status` VARCHAR(50) NOT NULL DEFAULT 'pending',
+            `seen` TINYINT(1) NOT NULL DEFAULT 0,
+            `pop_seen` TINYINT(1) NOT NULL DEFAULT 0,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            
+            PRIMARY KEY (`history_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    ");
+
+
+    }
+	
     public function uninstall() {
            $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "worker_skill`");
-           // $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "wk_skill_cust`");
-           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "hire_request`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "wk_skill_cust`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "hire_requests`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "worker_likes`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "worker_reviews`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "worker_details`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "worker_hire_history`");
 
       }
   

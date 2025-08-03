@@ -47,7 +47,6 @@ class ModelWkSkillCustSkills extends Model {
 
   
       public function getWorkers() {
-        
         $sql = "SELECT c.*, ws.*, wd.*, CONCAT(c.firstname, ' ', c.lastname) AS name FROM " . DB_PREFIX . "worker_skill ws LEFT JOIN " . DB_PREFIX . "customer c ON (c.customer_id = ws.customer_id) LEFT JOIN " . DB_PREFIX . "worker_details wd ON (c.customer_id = wd.customer_id) WHERE 1=1";
         $query = $this->db->query($sql);
         if (!empty($query->rows)) {
@@ -93,24 +92,26 @@ class ModelWkSkillCustSkills extends Model {
   }
 
   public function setLikeStatus($worker_id, $user_id, $action) {
-    $this->db->query("DELETE FROM worker_likes WHERE worker_id = '" . (int)$worker_id . "' AND user_id = '" . (int)$user_id . "'");
+$this->db->query("DELETE FROM `" . DB_PREFIX . "worker_likes` WHERE worker_id = '" . (int)$worker_id . "' AND user_id = '" . (int)$user_id . "'");
 
     if (in_array($action, ['like', 'dislike'])) {
-        $this->db->query("INSERT INTO worker_likes SET 
-            worker_id = '" . (int)$worker_id . "', 
-            user_id = '" . (int)$user_id . "', 
-            status = '" . $this->db->escape($action) . "',
-            date_added = NOW()");
+       $this->db->query("INSERT INTO `" . DB_PREFIX . "worker_likes` SET 
+        worker_id = '" . (int)$worker_id . "', 
+        user_id = '" . (int)$user_id . "', 
+        status = '" . $this->db->escape($action) . "',
+        date_added = NOW()");
+
     }
   }
 
   public function getLikesCount($worker_id) {
-    $query = $this->db->query("SELECT COUNT(*) AS total FROM worker_likes WHERE worker_id = '" . (int)$worker_id . "' AND status = 'like'");
+    $query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "worker_likes` WHERE worker_id = '" . (int)$worker_id . "' AND status = 'like'");
+
     return $query->row['total'];
  }
 
   public function getDislikesCount($worker_id) {
-    $query = $this->db->query("SELECT COUNT(*) AS total FROM worker_likes WHERE worker_id = '" . (int)$worker_id . "' AND status = 'dislike'");
+    $query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "worker_likes` WHERE worker_id = '" . (int)$worker_id . "' AND status = 'dislike'");
     return $query->row['total'];
  }
   
@@ -122,6 +123,7 @@ class ModelWkSkillCustSkills extends Model {
         title = '" . $this->db->escape($title) . "',
         review = '" . $this->db->escape($review) . "',
         recommend = '" . (int)$recommend . "',
+        status = '1',
         date_added = NOW()");
    }
 
@@ -139,14 +141,80 @@ class ModelWkSkillCustSkills extends Model {
      return $query->row['rating'];
    }
 
+ public function getReviewCount($worker_id) {
+    $query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "worker_reviews WHERE worker_id = '" . (int)$worker_id . "'");
+    return (int)$query->row['total'];
+}
+
+public function getWorkerName($customer_id) {
+    $query = $this->db->query("SELECT firstname, lastname FROM " . DB_PREFIX . "customer WHERE customer_id = '" . (int)$customer_id . "'");
+    
+    if ($query->num_rows) {
+        return $query->row['firstname'] . ' ' . $query->row['lastname'];
+    } else {
+        return '';
+    }
+}
+
+
+
    public function addRequest($data) {
-    $this->db->query("INSERT INTO `" . DB_PREFIX . "hire_requests` SET worker_id = '" . (int)$data['worker_id'] . "', customer_name = '" . $this->db->escape($data['customer_name']) . "', customer_mobile = '" . $this->db->escape($data['customer_mobile']) . "', customer_address = '" . $this->db->escape($data['customer_address']) . "', status = 'pending'");
+    //  $this->addNotification($data);
+     $this->addHireHistory($data); 
    }
+
+ public function addHireHistory($data) {
+    // Load worker info and stats
+    $workerInfo     = $this->getWorkerInfo($data['worker_id']);
+    $likeCount      = $this->getLikesCount($data['worker_id']);
+    $dislikesCount  = $this->getDislikesCount($data['worker_id']);
+    $rating         = $this->getRating($data['worker_id']);
+    $reviewCount    = $this->getReviewCount($data['worker_id']);
+    $workerName = $this->getWorkerName($workerInfo['customer_id']);  // Get full name
+    $customer_id = 0;
+    if ($this->customer->isLogged()) {
+        $customer_id = (int)$this->customer->getId();
+    }
+
+    $this->db->query("
+        INSERT INTO `" . DB_PREFIX . "worker_hire_history` 
+        SET 
+            customer_id = '" . (int)$customer_id . "',
+            customer_name = '" . $this->db->escape($data['customer_name']) . "',
+            customer_mobile = '" . $this->db->escape($data['customer_mobile']) . "',
+            customer_address = '" . $this->db->escape($data['customer_address']) . "',
+            worker_id = '" . (int)$workerInfo['customer_id'] . "',
+            worker_name = '" . $this->db->escape($workerName) . "', 
+            occupation_id = '" . (int)$workerInfo['occupation_id'] . "',
+            skill = '" . $this->db->escape($workerInfo['skill']) . "',
+            price_per_day = '" . (float)$workerInfo['price_per_day'] . "',
+            date_of_birth = '" . $this->db->escape($workerInfo['date_of_birth']) . "',
+            image = '" . $this->db->escape($workerInfo['image']) . "',
+            range_km = '" . (int)$workerInfo['range_km'] . "',
+            experience = '" . (int)$workerInfo['experience'] . "',
+            description = '" . $this->db->escape($workerInfo['description']) . "',  
+            avg_rating = '" . round((float)$rating, 1) . "',
+            review_count = '" . (int)$reviewCount . "',
+            likes = '" . (int)$likeCount . "',
+            dislikes = '" . (int)$dislikesCount . "',
+            status = 'pending',
+            seen = 0,
+            pop_seen = 0,
+            created_at = NOW()
+    ");
+}
+
+   public function addNotification($data) {
+
+         $this->db->query("INSERT INTO `" . DB_PREFIX . "hire_requests` SET worker_id = '" . (int)$data['worker_id'] . "', customer_name = '" . $this->db->escape($data['customer_name']) . "', customer_mobile = '" . $this->db->escape($data['customer_mobile']) . "', customer_address = '" . $this->db->escape($data['customer_address']) . "', seen = '0', popup_seen = '0', status = 'pending'");
+
+   }
+
 
    public function getUnseenRequests($worker_id) {
      $query = $this->db->query("
     SELECT * FROM `" . DB_PREFIX . "hire_requests`
-    WHERE worker_id = '" . (int)$worker_id . "' AND pop_seen = 0
+    WHERE worker_id = '" . (int)$worker_id . "' AND popup_seen = 0
     ORDER BY created_at DESC
       ");
   return $query->rows;
@@ -163,7 +231,7 @@ class ModelWkSkillCustSkills extends Model {
  public function markRequestSeen($request_id) {
    $this->db->query("
     UPDATE `" . DB_PREFIX . "hire_requests`
-    SET pop_seen = 1
+    SET popup_seen = 1
     WHERE id = '" . (int)$request_id . "'
   ");
 }

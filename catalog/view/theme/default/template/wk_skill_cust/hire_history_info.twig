@@ -1,0 +1,127 @@
+{{ header }}
+<div id="account-hire" class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+      <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+
+  {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+  {% endif %}
+
+  {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+  {% endif %}
+
+  <div class="row">{{ column_left }}
+    {% if column_left and column_right %}
+      {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+      {% set class = 'col-sm-9' %}
+    {% else %}
+      {% set class = 'col-sm-12' %}
+    {% endif %}
+
+    <div id="content" class="{{ class }}">{{ content_top }}
+      <h2>{{ heading_title }}</h2>
+
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <td colspan="2" class="text-left">{{ text_hire_detail }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="width: 50%;">
+              <b>{{ text_hire_reference }}</b> {{ hire_reference }}<br/>
+              <b>{{ text_hire_date }}</b> {{ created_at }}<br/>
+              <b>{{ text_status }}</b> {{ status }}<br/>
+              {% if hire_end_date %}
+              <b>{{ text_hire_end_date }}</b> {{ hire_end_date }}<br/>
+              <b>{{ text_hire_days }}</b> {{ hire_days }}<br/>
+              <b>{{ text_total_cost }}</b> {{ total_cost }}<br/>
+              {% else %}
+              <form method="post" action="{{ add_end_date_action }}">
+                <label for="hire_end_date"><b>{{ text_add_end_date }}</b></label>
+                <input type="date" id="hire_end_date" name="hire_end_date" class="form-control" required>
+                <button type="submit" class="btn btn-primary btn-sm mt-1">{{ button_add }}</button>
+              </form>
+              {% endif %}
+            </td>
+            <td style="width: 50%;">
+              <b>{{ text_customer_name }}</b> {{ customer_name }}<br/>
+              <b>{{ text_customer_mobile }}</b> {{ customer_mobile }}<br/>
+              <b>{{ text_customer_email }}</b> {{ email }}<br/>
+              <b>{{ text_customer_address }}</b> <br/>{{ customer_address|raw }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>{{ text_worker_details }}</h3>
+      <div class="row">
+        <div class="col-sm-3 text-center">
+          <img src="{{ worker_image }}" class="img-thumbnail" alt="{{ worker_name }}" />
+        </div>
+        <div class="col-sm-9">
+          <table class="table table-bordered">
+            <tr><td><b>{{ text_worker_name }}</b></td><td>{{ worker_name }}</td></tr>
+            <tr><td><b>{{ text_skill }}</b></td><td>{{ occupation }}</td></tr>
+            <tr><td><b>{{ text_experience }}</b></td><td>{{ experience }} {{ text_years }}</td></tr>
+            <tr><td><b>{{ text_price_per_day }}</b></td><td>{{ price_per_day }}</td></tr>
+            <tr><td><b>{{ text_dob }}</b></td><td>{{ date_of_birth }}</td></tr>
+            <tr><td><b>{{ text_range_km }}</b></td><td>{{ range_km }} km</td></tr>
+            <tr><td><b>{{ text_rating }}</b></td><td>{{ avg_rating }}/5 ({{ review_count }} {{ text_reviews }})</td></tr>
+            <tr><td><b>{{ text_likes }}</b></td><td>{{ likes }} 👍 | {{ dislikes }} 👎</td></tr>
+            <tr><td><b>{{ text_description }}</b></td><td>{{ description }}</td></tr>
+          </table>
+          <a href="{{ worker_profile_link }}" class="btn btn-secondary"><i class="fa fa-user"></i> {{ button_view_profile }}</a>
+          <a href="tel:{{ worker_phone }}" class="btn btn-success"><i class="fa fa-phone"></i> {{ button_call_worker }}</a>
+        </div>
+      </div>
+
+      {% if status == 'completed' and not has_reviewed %}
+      <h4>{{ text_rate_worker }}</h4>
+      <form action="{{ review_action }}" method="post">
+        <label for="rating">{{ text_rating }}</label>
+        <select name="rating" id="rating" class="form-control">
+          <option value="1">1 - Poor</option>
+          <option value="2">2 - Fair</option>
+          <option value="3">3 - Good</option>
+          <option value="4">4 - Very Good</option>
+          <option value="5">5 - Excellent</option>
+        </select>
+        <label for="comment">{{ text_comment }}</label>
+        <textarea name="comment" id="comment" class="form-control"></textarea>
+        <button type="submit" class="btn btn-primary mt-2">{{ button_submit_review }}</button>
+      </form>
+      {% endif %}
+
+      {% if status == 'pending' %}
+        <a href="{{ cancel_link }}" class="btn btn-danger"><i class="fa fa-times-circle"></i> {{ button_cancel }}</a>
+      {% endif %}
+      {% if status == 'approved' %}
+        <a href="{{ extend_link }}" class="btn btn-warning"><i class="fa fa-clock-o"></i> {{ button_extend }}</a>
+      {% endif %}
+
+      <a href="{{ invoice_download_link }}" class="btn btn-default"><i class="fa fa-file-pdf-o"></i> {{ button_invoice }}</a>
+
+      <h4>{{ text_customer_location }}</h4>
+      <iframe src="https://maps.google.com/maps?q={{ customer_address|url_encode }}&output=embed" width="100%" height="250" frameborder="0"></iframe>
+
+      <div class="buttons clearfix">
+        <div class="pull-right"><a href="{{ continue }}" class="btn btn-primary">{{ button_continue }}</a></div>
+      </div>
+
+      {{ content_bottom }}
+    </div>
+    {{ column_right }}
+  </div>
+</div>
+{{ footer }}

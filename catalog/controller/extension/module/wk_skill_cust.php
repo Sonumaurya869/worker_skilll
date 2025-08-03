@@ -10,8 +10,7 @@ class ControllerExtensionModuleWkSkillCust extends Controller {
 		$data['workers'] = array();
 
 		$workers = $this->model_wk_skill_cust_skills->getWorkers();
-
-     
+       if (!empty($workers)) {
         foreach ($workers as $worker) {
                $age = '';
           if ($worker['date_of_birth']) {
@@ -45,6 +44,7 @@ class ControllerExtensionModuleWkSkillCust extends Controller {
 				'href'     => $this->url->link('wk_skill_cust/skills/worker', 'worker_id=' . $worker['customer_id'])
 			);
         }
+       }
 		if ($data['workers']) {
 			return $this->load->view('extension/module/wk_skill_cust', $data);
 		}
@@ -95,7 +95,6 @@ class ControllerExtensionModuleWkSkillCust extends Controller {
         $review = $this->db->escape($this->request->post['review']);
         $recommend = isset($this->request->post['recommend']) ? (int)$this->request->post['recommend'] : 0;
         $customer_id = (int)$this->customer->getId();
-
         if (!$worker_id || !$rating || !$title || !$review) {
             $json['error'] = 'Please fill all required fields.';
         } else {
@@ -129,4 +128,6 @@ class ControllerExtensionModuleWkSkillCust extends Controller {
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
     }
+
+
 }

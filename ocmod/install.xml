@@ -61,6 +61,21 @@
       ]]></add>
     </operation>
   </file>
+   <file path="admin/model/customer/customer.php">
+    <operation>
+      <search><![CDATA[public function deleteCustomer($customer_id) {]]></search>
+      <add position="after"><![CDATA[
+       if($this->config->get('module_wk_skill_cust_status')) {
+
+          $this->load->model('wk_skill_cust/customer');
+          $this->model_wk_skill_cust_customer->deleteWorker($customer_id);
+
+        }
+        
+       
+      ]]></add>
+    </operation>
+  </file>
    <file path="catalog/controller/account/register.php">
     <operation>
       <search><![CDATA[$data['column_left'] = $this->load->controller('common/column_left');]]></search>
@@ -90,7 +105,7 @@
     <operation>
       <search><![CDATA[private function validate() {]]></search>
       <add position="after"><![CDATA[
-
+        if($this->config->get('module_wk_skill_cust_status')) {
        if (isset($this->request->post['worker']) && $this->request->post['worker'] == '1') {
           // Validate date_of_birth (ensure it's a valid date and user is 18+)
         if (empty($this->request->post['date_of_birth']) || strtotime($this->request->post['date_of_birth']) === false) {
@@ -113,7 +128,7 @@
        }
 
       }
-       
+       }
       ]]></add>
     </operation>
   </file>
@@ -121,16 +136,17 @@
     <operation>
       <search><![CDATA[if ($customer_group_info['approval']) {]]></search>
       <add position="before"><![CDATA[
-
+        if($this->config->get('module_wk_skill_cust_status')) {
          if($data['worker']) {
 		  $this->load->model('wk_skill_cust/skills');
 		  $this->model_wk_skill_cust_skills->addWorkerSkill($customer_id, $data);
 	    }
+      }
        
       ]]></add>
     </operation>
   </file>
-  <file path="catalog/model/account/register.twig">
+  <file path="catalog/view/theme/default/*/account/register.twig">
     <operation>
       <search><![CDATA[{{ captcha }}]]></search>
       <add position="before"><![CDATA[
@@ -140,14 +156,108 @@
       ]]></add>
     </operation>
   </file>
-   <file path="catalog/model/account/account.twig">
+   <file path="catalog/view/theme/default/*/account/account.twig">
     <operation>
       <search><![CDATA[{% if success %}]]></search>
       <add position="before"><![CDATA[
-
-         {{ skill_button }}
-       
+              {{ skill_button }}
       ]]></add>
     </operation>
   </file>
+   <file path="catalog/controller/common/header.php">
+    <operation>
+      <search><![CDATA[	return $this->load->view('common/header', $data);]]></search>
+      <add position="before"><![CDATA[
+                $data['notify'] = false;
+              if($this->config->get('module_wk_skill_cust_status')) {   
+              if ($this->customer->isLogged()) {
+		             $this->load->model('wk_skill_cust/skills');
+                 $data['notification_count']= $this->model_wk_skill_cust_skills->countUnseenNotification($this->customer->getId());
+		             $data['notification'] = $this->load->controller('wk_skill_cust/worker_notification');
+		             $data['notification_url']=$this->url->link('wk_skill_cust/worker_notification/view', '', true);
+	         	     $data['notify'] = true;
+              } else {
+			           $data['notification'] = array();
+                 $data['notify'] = false;
+		        }
+            }
+      ]]></add>
+    </operation>
+  </file>
+   <file path="catalog/view/theme/*/template/common/header.twig">
+    <operation>
+      <search><![CDATA[<li><a href="{{ contact }}"><i class="fa fa-phone"></i></a>]]></search>
+      <add position="before"><![CDATA[
+              
+          <style>
+          .notif-badge {
+              position: absolute;
+              top: -10px;
+              right: -11px;
+              background: #E91E63;
+              color: white;
+              padding: 0px 5px;
+              font-size: 12px;;
+              border-radius: 50%;
+            }
+         </style>
+
+
+        {% if logged %}
+            <li style="position: relative;">
+                <a href="{{ notification_url }}" style="position: relative; display: inline-block;">
+                    <i class="fa fa-bell" style="font-size: 15px; color: #626961;"></i>
+                      {% if notification_count > 0 %}
+                        <span class="notif-badge">{{ notification_count }}</span>
+                      {% endif %}
+                </a>
+               <span class="hidden-xs hidden-sm hidden-md">{{ notification_text }}</span>
+             </li>
+        {% endif %}
+      ]]></add>
+    </operation>
+  </file>
+  <file path="catalog/view/theme/*/template/common/header.twig">
+    <operation>
+      <search><![CDATA[{{ menu }}]]></search>
+      <add position="before"><![CDATA[
+          {% if notify %}    
+         {{ notification|raw }}
+          {% endif %}
+
+      ]]></add>
+    </operation>
+  </file>
+   <file path="catalog/controller/extension/module/account.php">
+    <operation>
+      <search><![CDATA[$data['logged'] = $this->customer->isLogged();]]></search>
+      <add position="after"><![CDATA[
+          if($this->config->get('module_wk_skill_cust_status')) {
+             $data['hire_history'] = $this->url->link('wk_skill_cust/hire_history', '', true);
+          }
+          $data['hire'] = $this->config->get('module_wk_skill_cust_status');
+
+      ]]></add>
+    </operation>
+  </file>
+  <file path="catalog/language/en-gb/extension/module/account.php">
+    <operation>
+      <search><![CDATA[$_['text_recurring']   = 'Recurring payments';]]></search>
+      <add position="after"><![CDATA[
+          $_['text_hire_history'] = 'Hire History';
+
+      ]]></add>
+    </operation>
+  </file>
+  <file path="catalog/view/theme/default/template/extension/module/account.twig">
+    <operation>
+      <search><![CDATA[<a href="{{ edit }}" class="list-group-item">{{ text_edit }}</a>]]></search>
+      <add position="befor"><![CDATA[
+         {%  if hire %}
+            <a href="{{ hire_history }}" class="list-group-item">{{ text_hire_history }}</a>
+          {% endif %}
+      ]]></add>
+    </operation>
+  </file>
+
 </modification>
