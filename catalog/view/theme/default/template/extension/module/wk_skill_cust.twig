@@ -291,6 +291,8 @@
         
         {% if worker.experience %}
         <p class="worker-experience"><strong>Experience:</strong> {{ worker.experience }} years</p>
+        {% else %}
+        <p class="worker-experience"><strong>Experience:</strong> 0 years</p>
         {% endif %}
         
         {% if worker.telephone %}

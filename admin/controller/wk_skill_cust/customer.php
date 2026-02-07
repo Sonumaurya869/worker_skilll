@@ -651,10 +651,11 @@ class ControllerWkSkillCustCustomer extends Controller {
                 $data['image'] = '';
             }
 
+
+
 		$this->load->model('wk_skill_cust/skills'); 
 	    $occupation_data = $this->model_wk_skill_cust_skills->getEnableSkills();
         $data['occupations'] = [];
-
         foreach ($occupation_data as $occupation) {
            if ($occupation['status']) {
                 $data['occupations'][] = [

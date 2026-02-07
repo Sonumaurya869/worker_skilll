@@ -26,11 +26,62 @@
 				);
 			}
 
-            if ($this->user->hasPermission('access', 'wk_skill_cust/skills')) {
+      if ($this->user->hasPermission('access', 'wk_skill_cust/skills')) {
 				$wk_skill_cust[] = array(
 					'name'	   => $this->language->get('skills'),
 					'href'     => $this->url->link('wk_skill_cust/skills', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
+				);
+			}
+
+       if ($this->user->hasPermission('access', 'wk_skill_cust/work_status')) {
+				$wk_skill_cust[] = array(
+					'name'	   => $this->language->get('work_status'),
+					'href'     => $this->url->link('wk_skill_cust/work_status', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+      if ($this->user->hasPermission('access', 'wk_skill_cust/review')) {
+				$wk_skill_cust[] = array(
+					'name'	   => $this->language->get('review'),
+					'href'     => $this->url->link('wk_skill_cust/review', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+       if ($this->user->hasPermission('access', 'wk_skill_cust/hire_history')) {
+				$wk_skill_cust[] = array(
+					'name'	   => $this->language->get('hire_history'),
+					'href'     => $this->url->link('wk_skill_cust/hire_history', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			// recharge
+			$recharge = array();
+
+			if ($this->user->hasPermission('access', 'wk_skill_cust/recharge')) {
+				$recharge[] = array(
+					'name'     => $this->language->get('text_recharge_history'),
+					'href'     => $this->url->link('wk_skill_cust/recharge', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'wk_skill_cust/recharge_duration')) {
+				$recharge[] = array(
+					'name'	   => $this->language->get('text_recharge_duration'),
+					'href'     => $this->url->link('wk_skill_cust/recharge_duration', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($recharge) {
+				$wk_skill_cust[] = array(
+					'name'	   => $this->language->get('text_recharge'),
+					'href'     => '',
+					'children' => $recharge
 				);
 			}
 
@@ -45,6 +96,7 @@
 			}
 		 }
 
+
       ]]></add>
     </operation>
   </file>
@@ -57,6 +109,12 @@
       $_['text_customer']             = 'Customers';
       $_['skill_cust']                = 'Skill Customer';
       $_['skills']                    = 'Skills';
+      $_['review']                     = 'Review';
+      $_['work_status']               = 'Work Status';
+      $_['text_recharge_history']     = 'Recharge history';
+      $_['text_recharge_duration']    = 'Recharge Duration';
+      $_['text_recharge']             = 'Recharge';
+        $_['hire_history']             = 'Hire History';
        
       ]]></add>
     </operation>
@@ -201,8 +259,6 @@
               border-radius: 50%;
             }
          </style>
-
-
         {% if logged %}
             <li style="position: relative;">
                 <a href="{{ notification_url }}" style="position: relative; display: inline-block;">
@@ -239,6 +295,16 @@
 
       ]]></add>
     </operation>
+     <operation>
+      <search><![CDATA[$data['logged'] = $this->customer->isLogged();]]></search>
+      <add position="after"><![CDATA[
+          if($this->config->get('module_wk_skill_cust_status')) {
+             $data['my_recharge'] = $this->url->link('wk_skill_cust/worker_recharge', '', true);
+          }
+          $data['recharge'] = $this->config->get('module_wk_skill_cust_status');
+
+      ]]></add>
+    </operation>
   </file>
   <file path="catalog/language/en-gb/extension/module/account.php">
     <operation>
@@ -248,16 +314,115 @@
 
       ]]></add>
     </operation>
+     <operation>
+      <search><![CDATA[$_['text_recurring']   = 'Recurring payments';]]></search>
+      <add position="after"><![CDATA[
+          $_['text_my_recharge'] = 'My Recharge';
+
+      ]]></add>
+    </operation>
   </file>
   <file path="catalog/view/theme/default/template/extension/module/account.twig">
     <operation>
       <search><![CDATA[<a href="{{ edit }}" class="list-group-item">{{ text_edit }}</a>]]></search>
-      <add position="befor"><![CDATA[
+      <add position="after"><![CDATA[
          {%  if hire %}
             <a href="{{ hire_history }}" class="list-group-item">{{ text_hire_history }}</a>
           {% endif %}
       ]]></add>
     </operation>
+     <operation>
+      <search><![CDATA[<a href="{{ edit }}" class="list-group-item">{{ text_edit }}</a>]]></search>
+      <add position="after"><![CDATA[
+         {%  if recharge %}
+            <a href="{{ my_recharge }}" class="list-group-item">{{ text_my_recharge }}</a>
+          {% endif %}
+      ]]></add>
+    </operation>
   </file>
+   <file path="admin/view/template/catalog/product_form.twig">
+    <operation>
+      <search><![CDATA[<div class="tab-pane" id="tab-data">]]></search>
+      <add position="after"><![CDATA[
+          <div class="form-group required">
+  <label class="col-sm-2 control-label">Select Recharge Plan</label>
+  <div class="col-sm-10">
+    <select name="plan_id" class="form-control">
+      <option value="">-- Select Plan --</option>
+      {% for plan in plan_list %}
+        <option value="{{ plan.plan_id }}" {% if plan.plan_id == selected_plan %}selected="selected"{% endif %}>
+          {{ plan.plan_name }} ({{ plan.duration }} days)
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+      ]]></add>
+    </operation>
+  </file>
+    <file path="admin/controller/catalog/product.php">
+    <operation>
+      <search><![CDATA[$data['tax_classes'] = $this->model_localisation_tax_class->getTaxClasses();]]></search>
+      <add position="befor"><![CDATA[
+      if($this->config->get('module_wk_skill_cust_status')) {
+         $this->load->model('wk_skill_cust/recharge');
+        $plan_list = $this->model_wk_skill_cust_recharge->getRechargePlan(array(
+          'sort' => 'plan_id',
+          'order' => 'ASC'
+         ));
 
+        $data['plan_list'] = $plan_list;
+
+        if (isset($this->request->post['plan_id'])) {
+          $data['selected_plan'] = (int)$this->request->post['plan_id'];
+        } elseif (!empty($product_info)) {
+	       $plan_id= $this->model_wk_skill_cust_recharge->getProductPlans($this->request->get['product_id']);
+           $data['selected_plan'] = $plan_id; 
+        } else {
+            $data['selected_plan'] = 0; 
+        }
+        }
+      ]]></add>
+    </operation>
+  </file>
+  <file path="admin/model/catalog/product.php">
+    <operation>
+      <search><![CDATA[public function deleteProduct($product_id) {]]></search>
+      <add position="after"><![CDATA[
+      if($this->config->get('module_wk_skill_cust_status')) {
+        $this->load->model('wk_skill_cust/recharge');
+		    $this->model_wk_skill_cust_recharge->deleteProductPlans($product_id);
+        }
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[public function editProduct($product_id, $data) {]]></search>
+      <add position="after"><![CDATA[
+      if($this->config->get('module_wk_skill_cust_status')) {
+           $this->load->model('wk_skill_cust/recharge');
+	        	$this->model_wk_skill_cust_recharge->addProductPlans($product_id, $data['plan_id']);
+      }
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[$product_id = $this->db->getLastId();]]></search>
+      <add position="after"><![CDATA[
+      if($this->config->get('module_wk_skill_cust_status')) {
+           $this->load->model('wk_skill_cust/recharge');
+	        	$this->model_wk_skill_cust_recharge->addProductPlans($product_id, $data['plan_id']);
+        }
+      ]]></add>
+    </operation>
+  </file>
+   <file path="catalog/model/checkout/order.php">
+    <operation>
+      <search><![CDATA[$this->cache->delete('product');]]></search>
+      <add position="before"><![CDATA[
+      if($this->config->get('module_wk_skill_cust_status')) {
+        $this->load->model('wk_skill_cust/recharge');
+			  $this->model_wk_skill_cust_recharge->addRecharge($order_id);
+        }
+      ]]></add>
+    </operation>
+  </file>
 </modification>

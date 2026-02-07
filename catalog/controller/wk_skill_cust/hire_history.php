@@ -87,6 +87,8 @@ class ControllerWkSkillCustHireHistory extends Controller {
 
 	public function info() {
 		$this->load->language('wk_skill_cust/hire_history');
+		$this->load->model('wk_skill_cust/hire_history');
+
 
 		if (isset($this->request->get['hire_id'])) {
 			$hire_id = $this->request->get['hire_id'];
@@ -94,15 +96,31 @@ class ControllerWkSkillCustHireHistory extends Controller {
 			$hire_id = 0;
 		}
 
+	  if ($this->request->server['REQUEST_METHOD'] == 'POST' && isset($this->request->post['hire_end_date'])) {
+           $hire_end_date = $this->request->post['hire_end_date'];
+
+        // Optional: validate the date
+        if (strtotime($hire_end_date) === false) {
+            $this->session->data['error'] = $this->language->get('error_invalid_date');
+        } else {
+            $this->model_wk_skill_cust_hire_history->updateHireEndDate($hire_id, $hire_end_date);
+            $this->session->data['success'] = $this->language->get('text_end_date_added');
+        }
+
+        $this->response->redirect($this->url->link('wk_skill_cust/hire_history/info', 'hire_id=' . $hire_id, true));
+      }
+
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->url->link('wk_skill_cust/hire_history/info', 'order_id=' . $order_id, true);
 
 			$this->response->redirect($this->url->link('account/login', '', true));
 		}
 
-		$this->load->model('wk_skill_cust/hire_history');
+		
 
 		$hire_info = $this->model_wk_skill_cust_hire_history->getHireInfo($hire_id);
+
+		$data['workerStatusList'] = $this->model_wk_skill_cust_hire_history->getWorkerStatusList();
 
 		if ($hire_info) {
 			$this->document->setTitle($this->language->get('text_hire'));
@@ -154,7 +172,7 @@ class ControllerWkSkillCustHireHistory extends Controller {
               $this->load->model('tool/image');
 		
             $data['hire_id'] = $hire_info['history_id'];
-
+            
             $data['hire_reference'] = $hire_info['history_id'] ? 'HIRE-' . $hire_info['history_id'] : '';
 
              $data['customer_name'] = $hire_info['customer_name'];
@@ -178,6 +196,32 @@ class ControllerWkSkillCustHireHistory extends Controller {
               $data['likes'] = $hire_info['likes'];
               $data['dislikes'] = $hire_info['dislikes'];
 
+			  // Worker profile link (proper OpenCart URL)
+        $data['worker_profile_link'] = $this->url->link('wk_skill_cust/profile', 'worker_id=' . (int)$hire_info['worker_id'], true);
+        $data['worker_phone'] = !empty($hire_info['worker_mobile']) ? $hire_info['worker_mobile'] : 'N/A';
+
+
+        // Format end date for display
+        $data['hire_end_date'] = $hire_info['hire_end_date'] ? date($this->language->get('date_format_short'), strtotime($hire_info['hire_end_date'])) : null;
+
+      // Calculate total hire days if end date exists
+     if (!empty($hire_info['hire_end_date'])) {
+    $start = new DateTime(date('Y-m-d', strtotime($hire_info['created_at'])));
+    $end   = new DateTime($hire_info['hire_end_date']);
+    $data['hire_days'] = $start->diff($end)->days + 1; // +1 to include start date
+    } else {
+    $data['hire_days'] = null;
+   }
+
+// Format total cost for display
+     $data['total_cost'] = isset($hire_info['total_cost']) 
+    ? $this->currency->format($hire_info['total_cost'], $this->session->data['currency']) 
+    : null;
+
+         $data['add_end_date_action'] = $this->url->link('wk_skill_cust/hire_history/info', 'hire_id=' . $hire_id, true);
+
+
+
               $data['created_at'] = $hire_info['created_at'] ? date($this->language->get('date_format_short'), strtotime($hire_info['created_at'])) : '';
 
               if (!empty($hire_info['image']) && is_file(DIR_IMAGE . $hire_info['image'])) {
@@ -200,64 +244,5 @@ class ControllerWkSkillCustHireHistory extends Controller {
 		}
 	}
 
-	public function reorder() {
-		$this->load->language('account/order');
-
-		if (isset($this->request->get['order_id'])) {
-			$order_id = $this->request->get['order_id'];
-		} else {
-			$order_id = 0;
-		}
-
-		$this->load->model('account/order');
-
-		$order_info = $this->model_account_order->getOrder($order_id);
-
-		if ($order_info) {
-			if (isset($this->request->get['order_product_id'])) {
-				$order_product_id = $this->request->get['order_product_id'];
-			} else {
-				$order_product_id = 0;
-			}
-
-			$order_product_info = $this->model_account_order->getOrderProduct($order_id, $order_product_id);
-
-			if ($order_product_info) {
-				$this->load->model('catalog/product');
-
-				$product_info = $this->model_catalog_product->getProduct($order_product_info['product_id']);
-
-				if ($product_info) {
-					$option_data = array();
-
-					$order_options = $this->model_account_order->getOrderOptions($order_product_info['order_id'], $order_product_id);
-
-					foreach ($order_options as $order_option) {
-						if ($order_option['type'] == 'select' || $order_option['type'] == 'radio' || $order_option['type'] == 'image') {
-							$option_data[$order_option['product_option_id']] = $order_option['product_option_value_id'];
-						} elseif ($order_option['type'] == 'checkbox') {
-							$option_data[$order_option['product_option_id']][] = $order_option['product_option_value_id'];
-						} elseif ($order_option['type'] == 'text' || $order_option['type'] == 'textarea' || $order_option['type'] == 'date' || $order_option['type'] == 'datetime' || $order_option['type'] == 'time') {
-							$option_data[$order_option['product_option_id']] = $order_option['value'];
-						} elseif ($order_option['type'] == 'file') {
-							$option_data[$order_option['product_option_id']] = $order_option['value'];
-						}
-					}
-
-					$this->cart->add($order_product_info['product_id'], $order_product_info['quantity'], $option_data);
-
-					$this->session->data['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $product_info['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
-
-					unset($this->session->data['shipping_method']);
-					unset($this->session->data['shipping_methods']);
-					unset($this->session->data['payment_method']);
-					unset($this->session->data['payment_methods']);
-				} else {
-					$this->session->data['error'] = sprintf($this->language->get('error_reorder'), $order_product_info['name']);
-				}
-			}
-		}
-
-		$this->response->redirect($this->url->link('account/order/info', 'order_id=' . $order_id));
-	}
+	
 }

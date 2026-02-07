@@ -14,14 +14,14 @@ class ControllerWkSkillCustWorkerNotification extends Controller {
 
    
   public function markAsSeen() {
-    $json = json_decode(file_get_contents('php://input'), true); // ✅ receives JSON post body
+    $json = json_decode(file_get_contents('php://input'), true);
 
     if (!empty($json['id']) && $this->customer->isLogged()) {
         $request_id = (int)$json['id'];
 
         $this->load->model('wk_skill_cust/skills');
         $this->model_wk_skill_cust_skills->markAsSeen($request_id);
-
+        $this->model_wk_skill_cust_skills->markRequestSeen($request_id);
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode(['success' => true]));
     } else {

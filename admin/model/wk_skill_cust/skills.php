@@ -7,7 +7,7 @@ class ModelWkSkillCustSkills extends Model {
             CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "wk_skill_cust` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `skill` varchar(255) NOT NULL,
-              `wk_status` tinyint(1) NOT NULL,
+              `status` tinyint(1) NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
         ");
@@ -46,7 +46,7 @@ class ModelWkSkillCustSkills extends Model {
             `price_per_day` DECIMAL(10,2) NOT NULL,
             `date_of_birth` DATE NOT NULL,
             `image` VARCHAR(255) NOT NULL,
-            `status` TINYINT(1) NOT NULL DEFAULT 1,
+            `wk_status` TINYINT(1) NOT NULL DEFAULT 1,
             `date_added` DATETIME NOT NULL,
             PRIMARY KEY (`id`)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8
@@ -61,6 +61,7 @@ class ModelWkSkillCustSkills extends Model {
                 `customer_address` TEXT,
                 `seen` INT(10) NOT NULL,
                 `popup_seen` INT(10) NOT NULL,
+                `status` INT(10) NOT NULL,
                 `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ");
@@ -106,9 +107,62 @@ class ModelWkSkillCustSkills extends Model {
     ");
 
 
+     $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "hire_end_dates` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `hire_id` INT(11) NOT NULL,
+            `end_day` DATE NOT NULL,
+            `total_cost` DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+            PRIMARY KEY (`id`),
+            KEY `hire_id` (`hire_id`)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+    ");
+
+    $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "work_status` (
+            `work_status_id` INT(11) NOT NULL AUTO_INCREMENT,
+            `language_id` INT(11) NOT NULL,
+            `name` VARCHAR(255) NOT NULL,
+            PRIMARY KEY (`work_status_id`, `language_id`)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci
+    ");
+
+      // Create recharge plan master table
+    $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "wk_recharge_plan` (
+            `plan_id` INT(11) NOT NULL AUTO_INCREMENT,
+            `plan_name` VARCHAR(100) NOT NULL,
+            `plan_status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Active, 0 = Inactive',
+            `duration` INT(11) NOT NULL COMMENT 'Duration in days',
+            PRIMARY KEY (`plan_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    ");
+
+    // Create worker recharge table (no foreign keys)
+    $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "wk_worker_recharge` (
+            `recharge_id` INT(11) NOT NULL AUTO_INCREMENT,
+            `customer_id` INT(11) NOT NULL,
+            `order_id` INT(11) NOT NULL,
+            `plan_id` INT(11) NOT NULL,
+            `start_date` DATETIME NOT NULL,
+            `end_date` DATETIME NOT NULL,
+            `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Active, 0 = Expired',
+            PRIMARY KEY (`recharge_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    ");
+
+     $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "product_recharge_plan` (
+            `product_id` INT NOT NULL,
+            `plan_id` INT NOT NULL,
+            PRIMARY KEY (`product_id`, `plan_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    ");
+
     }
 	
-    public function uninstall() {
+      public function uninstall() {
            $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "worker_skill`");
            $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "wk_skill_cust`");
            $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "hire_requests`");
@@ -116,8 +170,13 @@ class ModelWkSkillCustSkills extends Model {
            $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "worker_reviews`");
            $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "worker_details`");
            $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "worker_hire_history`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "hire_end_dates`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "work_status`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "wk_recharge_plan`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "wk_worker_recharge`");
+           $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "product_recharge_plan`");
 
-      }
+       }
   
     public function getSkills($data = array()) {
         $sql = "SELECT * FROM " . DB_PREFIX . "wk_skill_cust";
@@ -161,6 +220,7 @@ class ModelWkSkillCustSkills extends Model {
     }
 
     public function addSkill($data) {
+
         $this->db->query("INSERT INTO " . DB_PREFIX . "wk_skill_cust SET skill = '" . $this->db->escape($data['skill']) . "', status = '" . (int)$data['status'] . "'");
     }
 

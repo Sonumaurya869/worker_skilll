@@ -1,50 +1,22 @@
-{{ header }}
-<style>
-
-  .status_block {
-    display: flex;
-    gap: 7px;
-  }
-  .button_block {
-    style="
-    margin: 5px;
-"
-  }
-
-</style>
-
-
-
-<div id="account-hire" class="container">
-  <ul class="breadcrumb">
-    {% for breadcrumb in breadcrumbs %}
-      <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-    {% endfor %}
-  </ul>
-
-  {% if success %}
-    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-review" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
     </div>
-  {% endif %}
-
-  {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-  {% endif %}
-
-  <div class="row">{{ column_left }}
-    {% if column_left and column_right %}
-      {% set class = 'col-sm-6' %}
-    {% elseif column_left or column_right %}
-      {% set class = 'col-sm-9' %}
-    {% else %}
-      {% set class = 'col-sm-12' %}
-    {% endif %}
-
-    <div id="content" class="{{ class }}">{{ content_top }}
-      <h2>{{ heading_title }}</h2>
+  </div>
+<div class="container-fluid">
+  <div class="row">
+      <div id="content" class="{{ class }}">
+     
 
       <table class="table table-bordered table-hover">
         <thead>
@@ -59,7 +31,7 @@
               <b>{{ text_hire_date }}</b> {{ created_at }}<br/>
               <b>{{ text_status }}</b> {{ status }}<br/>
               {% if hire_end_date %}
-  <b>{{ text_hire_end_date }}</b> {{ hire_end_date }}<br/>
+             <b>{{ text_hire_end_date }}</b> {{ hire_end_date }}<br/>
   <b>{{ text_hire_days }}</b> {{ hire_days }}<br/>
   <b>{{ text_total_cost }}</b> {{ total_cost }}<br/>
 {% endif %}
@@ -162,5 +134,9 @@
     </div>
     {{ column_right }}
   </div>
+      
+   <div>      
 </div>
+</div>
+
 {{ footer }}

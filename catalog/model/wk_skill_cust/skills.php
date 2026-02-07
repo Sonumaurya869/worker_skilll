@@ -159,7 +159,7 @@ public function getWorkerName($customer_id) {
 
 
    public function addRequest($data) {
-    //  $this->addNotification($data);
+     $this->addNotification($data);
      $this->addHireHistory($data); 
    }
 
@@ -206,7 +206,7 @@ public function getWorkerName($customer_id) {
 
    public function addNotification($data) {
 
-         $this->db->query("INSERT INTO `" . DB_PREFIX . "hire_requests` SET worker_id = '" . (int)$data['worker_id'] . "', customer_name = '" . $this->db->escape($data['customer_name']) . "', customer_mobile = '" . $this->db->escape($data['customer_mobile']) . "', customer_address = '" . $this->db->escape($data['customer_address']) . "', seen = '0', popup_seen = '0', status = 'pending'");
+         $this->db->query("INSERT INTO `" . DB_PREFIX . "hire_requests` SET worker_id = '" . (int)$data['worker_id'] . "', customer_name = '" . $this->db->escape($data['customer_name']) . "', customer_mobile = '" . $this->db->escape($data['customer_mobile']) . "', customer_address = '" . $this->db->escape($data['customer_address']) . "', seen = '0', popup_seen = '0', status = 4");
 
    }
 
@@ -260,6 +260,12 @@ public function getAllNotifications($worker_id) {
 
 public function updateRequestStatus($request_id, $status) {
     $this->db->query("UPDATE `" . DB_PREFIX . "hire_requests` SET status = '" . $this->db->escape($status) . "', seen = 1 WHERE id = '" . (int)$request_id . "'");
+    $this->updateHireHistory($request_id, $status);
+}
+
+public function updateHireHistory($request_id, $status) {
+    $this->db->query("UPDATE `" . DB_PREFIX . "worker_hire_history` SET status = '" . $this->db->escape($status) . "', seen = 1 WHERE history_id = '" . (int)$request_id . "'");
+
 }
 
 public function addCustomerNotification($request_id, $type) {
@@ -282,6 +288,5 @@ public function addCustomerNotification($request_id, $type) {
 public function deleteRequest($request_id, $worker_id) {
     $this->db->query("DELETE FROM `" . DB_PREFIX . "hire_requests` WHERE id = '" . (int)$request_id . "' AND worker_id = '" . (int)$worker_id . "'");
 }
-
 
 }

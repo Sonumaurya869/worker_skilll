@@ -1,0 +1,140 @@
+{{ header }}
+
+<div class="container-fluid">
+  <div class="row">
+    {{ column_left }}
+
+    <div id="content" class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
+      <style>
+      .timeline {
+        position: relative;
+        padding-left: 20px;
+        margin-top: 15px;
+      }
+      .timeline:before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #ddd;
+      }
+      .timeline-item {
+        position: relative;
+        margin-left: 15px;
+      }
+      .timeline-item:before {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 8px;
+        width: 12px;
+        height: 12px;
+        background: #007bff;
+        border-radius: 50%;
+      }
+      </style>
+
+      <!-- Header Section -->
+      <div class="page-header text-center bg-gradient p-4 mb-4"
+        style="background: linear-gradient(90deg, #007bff, #6610f2); color: #fff; border-radius: 10px;">
+        <h1 class="mb-1"><i class="fa fa-bolt"></i> {{ heading_view }}</h1>
+        <p class="lead">{{ recharges.current.firstname }} {{ recharges.current.lastname }}
+          (Customer ID: {{ recharges.current.customer_id }})</p>
+        <a href="{{ back }}" class="btn btn-light btn-sm"><i class="fa fa-arrow-left"></i> {{ button_back }}</a>
+      </div>
+
+      <div class="row">
+        <!-- Customer Info -->
+        <div class="col-md-4">
+          <div class="card mb-3 shadow-sm border-0 rounded-3">
+            <div class="card-header bg-primary text-white"><i class="fa fa-user"></i> {{ text_customer }}</div>
+            <div class="card-body">
+              <p><strong><i class="fa fa-user-circle"></i> Name:</strong> {{ recharges.current.firstname }}
+                {{ recharges.current.lastname }}</p>
+              <p><strong><i class="fa fa-envelope"></i> Email:</strong> {{ recharges.current.email }}</p>
+              <p><strong><i class="fa fa-phone"></i> Telephone:</strong> {{ recharges.current.telephone }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Info -->
+        <div class="col-md-4">
+          <div class="card mb-3 shadow-sm border-0 rounded-3">
+            <div class="card-header bg-success text-white"><i class="fa fa-shopping-cart"></i> {{ text_order }}</div>
+            <div class="card-body">
+              <p><strong>Order ID:</strong> #{{ recharges.current.order_id }}</p>
+              <p><strong>Date:</strong> {{ recharges.current.order_date|date("d-m-Y H:i") }}</p>
+              <p><strong>Payment:</strong> {{ recharges.current.payment_method }}</p>
+              <p><strong>Total:</strong> {{ recharges.current.order_total }}</p>
+              <a href="index.php?route=sale/order/info&user_token={{ user_token }}&order_id={{ recharges.current.order_id }}"
+                target="_blank" class="btn btn-outline-success btn-sm mt-2">
+                <i class="fa fa-eye"></i> View Order
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current Recharge -->
+        <div class="col-md-4">
+          <div class="card mb-3 shadow-sm border-0 rounded-3">
+            {% if current_status_text == 'Expired' %}
+              <div class="card-header bg-danger text-white">
+                <i class="fa fa-times-circle"></i> {{ text_current_recharge }}
+              </div>
+            {% elseif current_status_text == 'Active' %}
+              <div class="card-header bg-info text-white">
+                <i class="fa fa-battery-full"></i> {{ text_current_recharge }}
+              </div>
+            {% else %}
+              <div class="card-header bg-warning text-dark">
+                <i class="fa fa-clock"></i> {{ text_current_recharge }}
+              </div>
+            {% endif %}
+
+            <div class="card-body">
+              <p><strong>Plan:</strong> {{ recharges.current.plan_name }} ({{ recharges.current.duration }} days)</p>
+              <p><strong>Status:</strong> <span class="badge bg-{{ current_status_class }}">{{ current_status_text }}</span></p>
+              <p><strong>Start:</strong> {{ recharges.current.start_date|date("d-m-Y H:i") }}</p>
+              <p><strong>End:</strong> {{ recharges.current.end_date|date("d-m-Y H:i") }}</p>
+
+              {% if current_status_text == 'Active' %}
+              <div class="mt-3">
+                <label><strong>Usage Progress:</strong></label>
+                <div class="progress" style="height: 10px;">
+                  <div class="progress-bar bg-{{ current_status_class }}" role="progressbar"
+                       style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0"
+                       aria-valuemax="100"></div>
+                </div>
+                <small>{{ progress }}% used</small>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related Recharges -->
+      {% if recharges.related %}
+        <h4 class="mt-4"><i class="fa fa-history"></i> Related Recharges</h4>
+        <div class="timeline">
+          {% for r in recharges.related %}
+            <div class="timeline-item mb-3 p-3 rounded shadow-sm border-start border-{{ r.status_class }}"
+              style="background-color:#f9f9f9;">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5><span class="badge bg-{{ r.status_class }}">{{ r.status_text }}</span> - {{ r.plan_name }}</h5>
+                <small>{{ r.start_date|date("d-m-Y") }} → {{ r.end_date|date("d-m-Y") }}</small>
+              </div>
+              <p class="mb-1"><strong>Duration:</strong> {{ r.duration }} days</p>
+              <p class="mb-1"><strong>Status:</strong> {{ r.status_text }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{{ footer }}

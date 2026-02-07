@@ -44,6 +44,7 @@ $_['text_rate_worker'] = 'Rate the Worker';
 $_['text_comment'] = 'Comment:';
 $_['button_submit_review'] = 'Submit Review';
 $_['button_add'] = 'Add';
+$_['button_update'] = 'Update';
 $_['button_cancel'] = 'Cancel Hire';
 $_['button_extend'] = 'Extend Hire';
 $_['button_invoice'] = 'Download Invoice';
